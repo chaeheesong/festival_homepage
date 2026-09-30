@@ -1,6 +1,7 @@
 // Application form content, ported from yongyeon-application-forms.html
 
-export type FieldType = 'text' | 'tel' | 'choice' | 'select' | 'area' | 'file' | 'video' | 'check' | 'rules'
+/** 'name': Korean/English letters only. 'tel': digits only, auto-hyphenated. */
+export type FieldType = 'text' | 'name' | 'tel' | 'choice' | 'select' | 'area' | 'file' | 'video' | 'check' | 'rules'
 
 /** Where applicants without a video link should email their video */
 export const VIDEO_EMAIL = 'changig77@gmail.com'
@@ -48,7 +49,7 @@ const AGES = ['10대 미만', '10대', '20대', '30대', '40대', '50대', '60�
 const TYPE4 = ['개인', '가족', '친구', '단체']
 
 export const GUARDIAN_FIELDS: FieldDef[] = [
-  ['gname', '보호자 성명', 'text', '보호자 성명'],
+  ['gname', '보호자 성명', 'name', '보호자 성명'],
   ['gtel', '보호자 연락처', 'tel', '010-0000-0000'],
   ['gagree', '보호자로서 참가에 동의합니다', 'check'],
 ]
@@ -67,7 +68,7 @@ export const PROGRAMS = {
       ['모집인원', '용담1동 30명 / 용담2동 30명'],
     ],
     req: [
-      ['name', '성명', 'text', '홍길동'],
+      ['name', '성명', 'name', '홍길동'],
       ['tel', '연락처', 'tel', '010-0000-0000'],
       ['year', '출생연도 (용띠 확인)', 'choice', YONG],
       ['area', '거주지역', 'choice', ['용담1동', '용담2동', '제주시 기타']],
@@ -100,7 +101,7 @@ export const PROGRAMS = {
     ],
     mates: true,
     req: [
-      ['name', '신청자(대표) 성명', 'text', '홍길동'],
+      ['name', '신청자(대표) 성명', 'name', '홍길동'],
       ['tel', '연락처', 'tel', '010-0000-0000'],
       ['count', '참가인원 (본인 포함 총원)', 'select', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']],
       ['type', '참가형태', 'choice', TYPE4],
@@ -132,7 +133,7 @@ export const PROGRAMS = {
       ['기념품 또는 완주인증 제공', '준비 시 기념품 지급'],
     ],
     req: [
-      ['name', '참가자 성명', 'text', '홍길동'],
+      ['name', '참가자 성명', 'name', '홍길동'],
       ['tel', '연락처', 'tel', '010-0000-0000'],
       ['age', '연령대', 'choice', AGES],
       ['type', '참가구분', 'choice', TYPE4],
@@ -189,7 +190,7 @@ export const PROGRAMS = {
     ],
     req: [
       ['team', '팀명', 'text', '팀명'],
-      ['name', '대표자 성명', 'text', '홍길동'],
+      ['name', '대표자 성명', 'name', '홍길동'],
       ['tel', '연락처', 'tel', '010-0000-0000'],
       ['area', '활동지역', 'text', '예: 용담1동'],
       ['count', '참가인원 (출연인원)', 'select', COUNT],
@@ -257,7 +258,7 @@ export const PROGRAMS = {
     ],
     req: [
       ['team', '참가자 또는 팀명', 'text', '이름 또는 팀명'],
-      ['name', '대표자 성명', 'text', '홍길동'],
+      ['name', '대표자 성명', 'name', '홍길동'],
       ['tel', '연락처', 'tel', '010-0000-0000'],
       ['type', '참가형태', 'choice', ['개인', '듀엣', '팀']],
       ['count', '참가인원', 'select', COUNT],

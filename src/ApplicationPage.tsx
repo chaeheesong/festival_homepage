@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { toBlob } from 'html-to-image'
 import { GUARDIAN_FIELDS, PROGRAMS, VIDEO_EMAIL } from './applications'
-import type { FieldDef, FormValues, Program, ProgramKey } from './applications'
+import { submitApplication } from './submitApplication'
+import type { FieldDef, FieldType, FormValues, Program, ProgramKey } from './applications'
 import './ApplicationPage.css'
 
 const MAIN_URL = './'
@@ -18,7 +19,7 @@ function buildSections(p: Program, v: FormValues): Section[] {
       sections.push({
         title: '동반 참가자',
         note: `참가인원에 맞춰 ${n}명 입력`,
-        fields: Array.from({ length: n }, (_, i): FieldDef => [`mate${i}`, `동반 참가자 ${i + 1} 이름`, 'text', '이름']),
+        fields: Array.from({ length: n }, (_, i): FieldDef => [`mate${i}`, `동반 참가자 ${i + 1} 이름`, 'name', '이름']),
         required: false,
       })
     }
@@ -28,6 +29,38 @@ function buildSections(p: Program, v: FormValues): Section[] {
     sections.push({ title: '보호자 정보', note: p.guardNote ?? '미성년자 참가 시 필요해요', fields: GUARDIAN_FIELDS, required: true })
   }
   return sections
+}
+
+// Names: Korean (incl. jamo while an IME is composing), English letters and spaces
+const NAME_INPUT_BLOCKED = /[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z ]/g
+const NAME_VALID = /^[가-힣a-zA-Z]+( [가-힣a-zA-Z]+)*$/
+const PHONE_VALID = /^(02-\d{3,4}|0\d{2}-\d{3,4})-\d{4}$/
+
+/** Formats digits as 010-1234-5678 / 064-728-4592 / 02-123-4567 */
+function formatPhone(input: string) {
+  const d = input.replace(/\D/g, '').slice(0, 11)
+  if (d.startsWith('02')) {
+    const x = d.slice(0, 10)
+    if (x.length <= 2) return x
+    if (x.length <= 5) return `${x.slice(0, 2)}-${x.slice(2)}`
+    if (x.length <= 9) return `${x.slice(0, 2)}-${x.slice(2, 5)}-${x.slice(5)}`
+    return `${x.slice(0, 2)}-${x.slice(2, 6)}-${x.slice(6)}`
+  }
+  if (d.length <= 3) return d
+  if (d.length <= 6) return `${d.slice(0, 3)}-${d.slice(3)}`
+  if (d.length <= 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`
+  return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`
+}
+
+function isValidFormat(type: FieldType, value: string) {
+  if (type === 'name') return NAME_VALID.test(value.trim())
+  if (type === 'tel') return PHONE_VALID.test(value)
+  return true
+}
+
+const FORMAT_ERRORS: Partial<Record<FieldType, string>> = {
+  name: '이름은 한글 또는 영문으로 정확히 입력해 주세요.',
+  tel: '전화번호를 끝까지 입력해 주세요.',
 }
 
 /** Whether a required field has been answered ("기타" also needs its free-text value) */
@@ -41,6 +74,9 @@ function isAnswered([key, , type, extra]: FieldDef, v: FormValues): boolean {
       return value === true
     case 'video':
       return filled(value) || v[`${key}Email`] === true
+    case 'name':
+    case 'tel':
+      return filled(value) && isValidFormat(type, value as string)
     case 'select': {
       const selected = filled(value) ? value : Array.isArray(extra) ? extra[0] : undefined
       return selected !== '기타' || filled(v[`${key}Etc`])
@@ -63,10 +99,16 @@ type FieldProps = {
   required: boolean
   values: FormValues
   set: (key: string, value: string | boolean | undefined) => void
+  setFile: (key: string, file: File) => void
 }
 
-function Field({ def: [key, label, type, extra], required, values, set }: FieldProps) {
+const MAX_FILE_MB = 10
+
+function Field({ def: [key, label, type, extra], required, values, set, setFile }: FieldProps) {
   const fileInput = useRef<HTMLInputElement>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
+  // Format errors show only after leaving the field, not mid-typing
+  const [blurred, setBlurred] = useState(false)
   const value = values[key]
   const text = typeof value === 'string' ? value : ''
   const placeholder = typeof extra === 'string' ? extra : ''
@@ -81,15 +123,41 @@ function Field({ def: [key, label, type, extra], required, values, set }: FieldP
         </label>
       )}
 
-      {(type === 'text' || type === 'tel') && (
+      {type === 'text' && (
         <input
           id={id}
           className="apply-input"
-          type={type}
+          type="text"
           placeholder={placeholder}
           value={text}
           onChange={(e) => set(key, e.target.value)}
         />
+      )}
+
+      {(type === 'name' || type === 'tel') && (
+        <>
+          <input
+            id={id}
+            className="apply-input"
+            type={type === 'tel' ? 'tel' : 'text'}
+            inputMode={type === 'tel' ? 'numeric' : undefined}
+            autoComplete={type === 'tel' ? 'tel' : 'name'}
+            maxLength={type === 'tel' ? 13 : 30}
+            placeholder={placeholder}
+            value={text}
+            aria-invalid={blurred && text !== '' && !isValidFormat(type, text)}
+            onChange={(e) =>
+              set(key, type === 'tel' ? formatPhone(e.target.value) : e.target.value.replace(NAME_INPUT_BLOCKED, ''))
+            }
+            onBlur={() => {
+              setBlurred(true)
+              if (type === 'name') set(key, text.replace(/ +/g, ' ').trim())
+            }}
+          />
+          {blurred && text !== '' && !isValidFormat(type, text) && (
+            <p className="apply-field-error">{FORMAT_ERRORS[type]}</p>
+          )}
+        </>
       )}
 
       {type === 'area' && (
@@ -200,27 +268,40 @@ function Field({ def: [key, label, type, extra], required, values, set }: FieldP
       )}
 
       {type === 'file' && (
-        <div className="apply-file">
-          <input
-            id={id}
-            className="apply-input apply-file-name"
-            placeholder={placeholder}
-            value={text}
-            onChange={(e) => set(key, e.target.value)}
-          />
-          <input
-            ref={fileInput}
-            type="file"
-            hidden
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) set(key, file.name)
-            }}
-          />
-          <button type="button" className="apply-file-button" onClick={() => fileInput.current?.click()}>
-            파일 첨부
-          </button>
-        </div>
+        <>
+          <div className="apply-file">
+            <input
+              id={id}
+              className="apply-input apply-file-name"
+              placeholder={placeholder}
+              value={text}
+              readOnly
+              onClick={() => fileInput.current?.click()}
+            />
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                e.target.value = ''
+                if (!file) return
+                if (file.size > MAX_FILE_MB * 1024 * 1024) {
+                  setFileError(`${MAX_FILE_MB}MB 이하의 이미지 파일만 첨부할 수 있어요.`)
+                  return
+                }
+                setFileError(null)
+                setFile(key, file)
+                set(key, file.name)
+              }}
+            />
+            <button type="button" className="apply-file-button" onClick={() => fileInput.current?.click()}>
+              파일 첨부
+            </button>
+          </div>
+          {fileError && <p className="apply-field-error">{fileError}</p>}
+        </>
       )}
 
       {type === 'check' && (
@@ -316,9 +397,22 @@ function Notice({ p }: { p: Program }) {
   return p.notice ? <div className="apply-notice">{p.notice}</div> : null
 }
 
-function ApplyForm({ p, onSubmit }: { p: Program; onSubmit: () => void }) {
-  const [values, setValues] = useState<FormValues>({})
+function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Program; onDone: () => void }) {
+  // Dropdowns show their first option, so start with that as the stored answer too
+  const [values, setValues] = useState<FormValues>(() =>
+    Object.fromEntries(
+      [...p.req, ...(p.opt ?? [])]
+        .filter(([, , type, extra]) => type === 'select' && Array.isArray(extra))
+        .map(([key, , , extra]) => [key, (extra as string[])[0]]),
+    ),
+  )
+  const [files, setFiles] = useState<Record<string, File>>({})
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  // Guards against a double click landing before the disabled state re-renders
+  const submittingRef = useRef(false)
   const set = (key: string, value: string | boolean | undefined) => setValues((v) => ({ ...v, [key]: value }))
+  const setFile = (key: string, file: File) => setFiles((f) => ({ ...f, [key]: file }))
   const agreed = !!values.agreePriv
   const sections = buildSections(p, values)
   const canSubmit =
@@ -346,9 +440,21 @@ function ApplyForm({ p, onSubmit }: { p: Program; onSubmit: () => void }) {
 
         <form
           className="apply-form"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault()
-            if (canSubmit) onSubmit()
+            if (!canSubmit || submittingRef.current) return
+            submittingRef.current = true
+            setSubmitting(true)
+            setSubmitError(null)
+            try {
+              await submitApplication(programKey, values, files)
+              onDone()
+            } catch (err) {
+              setSubmitError(err instanceof Error ? err.message : '신청을 접수하지 못했어요. 잠시 후 다시 시도해 주세요.')
+            } finally {
+              submittingRef.current = false
+              setSubmitting(false)
+            }
           }}
         >
           {sections.map((sec) => (
@@ -359,7 +465,7 @@ function ApplyForm({ p, onSubmit }: { p: Program; onSubmit: () => void }) {
               </div>
               <div className="apply-section__fields">
                 {sec.fields.map((def) => (
-                  <Field key={def[0]} def={def} required={sec.required} values={values} set={set} />
+                  <Field key={def[0]} def={def} required={sec.required} values={values} set={set} setFile={setFile} />
                 ))}
               </div>
             </div>
@@ -404,9 +510,14 @@ function ApplyForm({ p, onSubmit }: { p: Program; onSubmit: () => void }) {
 
           <div className="apply-submit">
             {p.early && <span className="apply-submit__early">모집인원 마감 시 조기마감될 수 있습니다</span>}
-            <button type="submit" className="apply-submit__button" disabled={!canSubmit}>
-              신청하기
+            <button type="submit" className="apply-submit__button" disabled={!canSubmit || submitting}>
+              {submitting ? '신청 중…' : '신청하기'}
             </button>
+            {submitError && (
+              <p className="apply-submit__error" role="alert">
+                {submitError}
+              </p>
+            )}
             <span className="apply-submit__hint">
               {canSubmit
                 ? '신청 완료 후 입력하신 연락처로 접수 확인 문자가 발송됩니다.'
@@ -615,8 +726,9 @@ export default function ApplicationPage({ programKey }: { programKey: ProgramKey
         <ApplyDone p={p} />
       ) : (
         <ApplyForm
+          programKey={programKey}
           p={p}
-          onSubmit={() => {
+          onDone={() => {
             setDone(true)
             window.scrollTo({ top: 0, behavior: 'instant' })
           }}

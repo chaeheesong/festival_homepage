@@ -387,6 +387,10 @@
   border-color: var(--blue);
 }
 
+.apply-input[aria-invalid='true'] {
+  border-color: #c0392b;
+}
+
 .apply-textarea {
   height: auto;
   padding: 12px 14px;
@@ -635,6 +639,21 @@
   background: #c9cde0;
   color: #5a607e;
   cursor: not-allowed;
+}
+
+.apply-submit__error,
+.apply-field-error {
+  font-weight: 700;
+  font-size: 14px;
+  color: #c0392b;
+}
+
+.apply-field-error {
+  font-size: 13px;
+}
+
+.apply-file-name {
+  cursor: pointer;
 }
 
 .apply-submit__hint {
