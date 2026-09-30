@@ -1,0 +1,95 @@
+@font-face {
+  font-family: 'Shilla Culture';
+  font-weight: 700;
+  font-display: swap;
+  /* Subset to the glyphs used in the logo/hero/application header (+ digits).
+     Re-run fontTools subset when adding new text. */
+  src: url('./assets/fonts/ShillaCultureB-subset.woff2') format('woff2');
+}
+
+:root {
+  --navy-900: #0b1030;
+  --navy-800: #10173f;
+  --paper: #f3f4f9;
+  --gold: #f2b233;
+  --blue: #2f58c9;
+  --slate: #4f5677;
+  --amber: #b25e00;
+
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  --font-serif: 'MaruBuri', serif;
+  --font-display: 'Shilla Culture', var(--font-serif);
+  --font-number: 'Inter', var(--font-sans);
+  --font-batang: 'Gowun Batang', serif;
+
+  --gutter: 56px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 77px;
+}
+
+@media (max-width: 768px) {
+  html {
+    scroll-padding-top: 55px;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--navy-800);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p, ul {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --gutter: 20px;
+  }
+}
+
+/* Show text variants per breakpoint (mobile = 768px and below) */
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: inline;
+  }
+}
