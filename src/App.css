@@ -197,6 +197,8 @@
   align-items: center;
   gap: 14px;
   margin-top: 22px; /* 40px total with the parent gap */
+  /* Nudged lower without changing the hero height */
+  transform: translateY(24px);
 }
 
 .hero__lineup-label {
@@ -208,7 +210,7 @@
 
 .hero__artists {
   display: flex;
-  gap: 40px;
+  gap: 36px;
 }
 
 .hero__artists li {
@@ -222,9 +224,17 @@
   text-shadow: 0 3px 7px rgba(0, 0, 0, 0.25);
 }
 
+/* Thin black outline so the names and "출연" stay readable on the bright photo */
+.hero__lineup-label,
+.hero__artists li span {
+  -webkit-text-stroke: 0.5px #000000;
+  paint-order: stroke fill;
+}
+
 .hero__artists img {
-  width: 84px;
-  height: 84px;
+  width: 124px;
+  height: 124px;
+  border-radius: 12px;
   object-fit: cover;
   object-position: top;
 }
@@ -967,6 +977,7 @@
   .hero__lineup {
     gap: 10px;
     margin-top: 16px; /* 28px total with the parent gap */
+    transform: translateY(16px);
   }
 
   .hero__lineup-label {
@@ -975,7 +986,7 @@
   }
 
   .hero__artists {
-    gap: 20px;
+    gap: 14px;
   }
 
   .hero__artists li {
@@ -985,8 +996,9 @@
   }
 
   .hero__artists img {
-    width: 72px;
-    height: 72px;
+    width: 96px;
+    height: 96px;
+    border-radius: 10px;
   }
 
   /* Shared headings */

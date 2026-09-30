@@ -84,7 +84,7 @@ function Hero() {
           <ul className="hero__artists">
             {artists.map((artist) => (
               <li key={artist.name}>
-                <img src={artist.image} alt={artist.name} width={84} height={84} />
+                <img src={artist.image} alt={artist.name} width={124} height={124} />
                 <span>{artist.name}</span>
               </li>
             ))}
