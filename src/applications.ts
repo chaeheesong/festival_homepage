@@ -3,8 +3,10 @@
 /** 'name': Korean/English letters only. 'tel': digits only, auto-hyphenated. */
 export type FieldType = 'text' | 'name' | 'tel' | 'choice' | 'select' | 'area' | 'file' | 'video' | 'check' | 'rules'
 
-/** Where applicants without a video link should email their video */
-export const VIDEO_EMAIL = 'changig77@gmail.com'
+/** Contact for applicants: video submissions by email and general inquiries */
+export const CONTACT_EMAIL = 'jms7564@hanmail.net'
+export const CONTACT_TEL = '064)900-4085'
+export const VIDEO_EMAIL = CONTACT_EMAIL
 
 /** [key, label, type, placeholder or options/rules] */
 export type FieldDef = [key: string, label: string, type: FieldType, extra?: string | string[]]
@@ -41,6 +43,14 @@ export type Program = {
   guardNote?: string
   when: string
   doneNote: string
+}
+
+/** Applications close at this moment (KST); forms and cards switch to "마감" after it */
+export const APPLY_DEADLINE = new Date('2026-10-20T18:00:00+09:00')
+export const APPLY_DEADLINE_LABEL = '2026. 10. 20.(화) 18:00'
+
+export function isApplyClosed(now = new Date()) {
+  return now.getTime() >= APPLY_DEADLINE.getTime()
 }
 
 const YONG = ['1940', '1952', '1964', '1976', '1988', '2000', '2012', '2024']
@@ -169,7 +179,7 @@ export const PROGRAMS = {
     cap: '8팀 선정',
     early: true,
     info: [
-      ['공연 일시', '2026. 10. 31.(토) 14:00~15:30'],
+      ['공연 일시', '2026. 10. 31.(토) 12:00~15:00'],
       ['장소', '용연 구름다리 일대 메인무대'],
       ['모집분야', '노래·밴드·댄스·난타·악기연주·퍼포먼스 등 (장르 제한 없음)'],
       ['모집규모', '8팀 (용담1동 3팀 / 용담2동 3팀 / 청소년팀 2팀)'],
@@ -203,7 +213,7 @@ export const PROGRAMS = {
       ['photo', '활동사진 1장', 'file', 'JPG·PNG 파일'],
       ['video', '공연영상 링크 (1~3분)', 'video', 'https://'],
     ],
-    when: '2026. 10. 31.(토) 14:00~15:30',
+    when: '2026. 10. 31.(토) 12:00~15:00',
     doneNote: '서류 심사 후 선정 결과를 개별 연락드립니다.',
   },
   song: {

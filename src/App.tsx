@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
+import { isApplyClosed } from './applications'
 import { IMAGE_DIR, MAP, MOBILE_QUERY, artists, contacts, experiences, navItems, programs, waves } from './data'
 import './App.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/jeju_neulpureun?stkn=MTQ0d3VoaXV3YjBrdQ%3D%3D'
-const DIRECTIONS_URL = 'https://map.naver.com/p/search/용연구름다리'
+const DIRECTIONS_URL = 'https://naver.me/Fk73m9sb'
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -42,15 +43,17 @@ function Header() {
 }
 
 function Hero() {
-  // Aspect ratio of whichever photo is showing (desktop or mobile), so the section
-  // height adapts when the image files are replaced
-  const [photoRatio, setPhotoRatio] = useState<number>()
+  // Natural size of whichever photo is showing (desktop or mobile): the ratio sizes the
+  // mobile section, the width keeps the photo from being enlarged past its original size
+  const [photo, setPhoto] = useState<{ width: number; ratio: number }>()
 
   return (
     <section
       id="about"
       className="hero"
-      style={photoRatio ? ({ '--photo-ratio': photoRatio } as CSSProperties) : undefined}
+      style={
+        photo ? ({ '--photo-ratio': photo.ratio, '--photo-width': `${photo.width}px` } as CSSProperties) : undefined
+      }
     >
       <picture>
         <source media={MOBILE_QUERY} srcSet={`${IMAGE_DIR}/hero-bg-mobile.png`} />
@@ -58,7 +61,10 @@ function Hero() {
           className="hero__bg"
           src={`${IMAGE_DIR}/hero-bg.png`}
           alt=""
-          onLoad={(e) => setPhotoRatio(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight)}
+          onLoad={(e) => {
+            const { naturalWidth, naturalHeight } = e.currentTarget
+            setPhoto({ width: naturalWidth, ratio: naturalWidth / naturalHeight })
+          }}
         />
       </picture>
       <div className="hero__content">
@@ -90,6 +96,7 @@ function Hero() {
 }
 
 function Recruit() {
+  const closed = isApplyClosed()
   return (
     <section id="apply" className="recruit">
       <div className="recruit__head">
@@ -104,7 +111,7 @@ function Recruit() {
       <ul className="recruit__cards">
         {programs.map((p) => (
           <li key={p.no}>
-            <a className="program-card" href={`?p=${p.apply}`}>
+            <a className={`program-card${closed ? ' is-closed' : ''}`} href={`?p=${p.apply}`}>
               <span className="program-card__no">{p.no}</span>
               <h3 className="program-card__title">{p.title}</h3>
               <div className="program-card__body">
@@ -113,7 +120,7 @@ function Recruit() {
                 {p.note && <p className="program-card__note">{p.note}</p>}
               </div>
               <span className="program-card__button">
-                신청<span className="desktop-only">하기</span> →
+                {closed ? '신청 마감' : <>신청<span className="desktop-only">하기</span> →</>}
               </span>
             </a>
           </li>
@@ -175,10 +182,9 @@ function Experience() {
                 src={exp.image}
                 alt=""
                 style={{
-                  '--crop-left': exp.crop.left,
                   '--crop-top': exp.crop.top,
-                  '--crop-width': exp.crop.width,
                   '--crop-height': exp.crop.height,
+                  '--mobile-shift-y': 'mobileShiftY' in exp ? exp.mobileShiftY : '0px',
                 } as CSSProperties}
               />
             </picture>

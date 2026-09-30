@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { toBlob } from 'html-to-image'
-import { GUARDIAN_FIELDS, PROGRAMS, VIDEO_EMAIL } from './applications'
+import {
+  APPLY_DEADLINE_LABEL,
+  CONTACT_EMAIL,
+  CONTACT_TEL,
+  GUARDIAN_FIELDS,
+  PROGRAMS,
+  VIDEO_EMAIL,
+  isApplyClosed,
+} from './applications'
 import { submitApplication } from './submitApplication'
 import type { FieldDef, FieldType, FormValues, Program, ProgramKey } from './applications'
 import './ApplicationPage.css'
@@ -250,8 +258,8 @@ function Field({ def: [key, label, type, extra], required, values, set, setFile 
             onChange={(e) => set(key, e.target.value)}
           />
           <p className="apply-video-note">
-            유튜브·구글 드라이브 등 영상 링크를 입력해 주세요. 링크가 없으면{' '}
-            <a href={`mailto:${VIDEO_EMAIL}`}>{VIDEO_EMAIL}</a>로 영상 파일을 보내주세요.
+            유튜브·구글 드라이브 등 영상 링크를 입력해 주세요. 링크가 없으면 영상 파일을 이메일(
+            <a href={`mailto:${VIDEO_EMAIL}`}>{VIDEO_EMAIL}</a>)로 보내주세요.
             <span>메일 제목에 팀명(이름)과 연락처를 적어 주세요.</span>
           </p>
           <button
@@ -397,7 +405,23 @@ function Notice({ p }: { p: Program }) {
   return p.notice ? <div className="apply-notice">{p.notice}</div> : null
 }
 
+function ApplyClosed() {
+  return (
+    <div className="apply-closed">
+      <span className="apply-closed__icon" aria-hidden>!</span>
+      <h2>신청이 마감되었습니다</h2>
+      <p>
+        신청 기간: ~ {APPLY_DEADLINE_LABEL}
+        <br />
+        참여해 주셔서 감사합니다. 행사 당일 현장에서 만나요!
+      </p>
+      <a className="apply-done__home" href={MAIN_URL}>메인으로</a>
+    </div>
+  )
+}
+
 function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Program; onDone: () => void }) {
+  const [closed, setClosed] = useState(() => isApplyClosed())
   // Dropdowns show their first option, so start with that as the stored answer too
   const [values, setValues] = useState<FormValues>(() =>
     Object.fromEntries(
@@ -426,105 +450,118 @@ function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Progr
         <span className="apply-hero__sub">{p.sub}</span>
         <div className="apply-hero__badges">
           <span className="apply-badge apply-badge--gold">{p.cap}</span>
-          <span className="apply-badge">QR 온라인 사전접수</span>
+          <span className="apply-badge">{closed ? '신청 마감' : 'QR 온라인 사전접수'}</span>
         </div>
       </section>
 
       <div className="apply-body">
         <aside className="apply-aside">
+          {!closed && (
+            <p className="apply-save-hint">신청 완료 후 아래 참가 안내를 이미지로 저장할 수 있어요.</p>
+          )}
           <InfoRows p={p} />
           <Notice p={p} />
           <Steps p={p} />
           <Tables p={p} />
         </aside>
 
-        <form
-          className="apply-form"
-          onSubmit={async (e) => {
-            e.preventDefault()
-            if (!canSubmit || submittingRef.current) return
-            submittingRef.current = true
-            setSubmitting(true)
-            setSubmitError(null)
-            try {
-              await submitApplication(programKey, values, files)
-              onDone()
-            } catch (err) {
-              setSubmitError(err instanceof Error ? err.message : '신청을 접수하지 못했어요. 잠시 후 다시 시도해 주세요.')
-            } finally {
-              submittingRef.current = false
-              setSubmitting(false)
-            }
-          }}
-        >
-          {sections.map((sec) => (
-            <div key={sec.title} className="apply-section">
+        {closed ? (
+          <ApplyClosed />
+        ) : (
+          <form
+            className="apply-form"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              if (!canSubmit || submittingRef.current) return
+              // The page may have been left open past the deadline
+              if (isApplyClosed()) {
+                setClosed(true)
+                window.scrollTo({ top: 0, behavior: 'instant' })
+                return
+              }
+              submittingRef.current = true
+              setSubmitting(true)
+              setSubmitError(null)
+              try {
+                await submitApplication(programKey, values, files)
+                onDone()
+              } catch (err) {
+                setSubmitError(err instanceof Error ? err.message : '신청을 접수하지 못했어요. 잠시 후 다시 시도해 주세요.')
+              } finally {
+                submittingRef.current = false
+                setSubmitting(false)
+              }
+            }}
+          >
+            {sections.map((sec) => (
+              <div key={sec.title} className="apply-section">
+                <div className="apply-section__head">
+                  <span className="apply-section__title">{sec.title}</span>
+                  {sec.note && <span className="apply-section__note">{sec.note}</span>}
+                </div>
+                <div className="apply-section__fields">
+                  {sec.fields.map((def) => (
+                    <Field key={def[0]} def={def} required={sec.required} values={values} set={set} setFile={setFile} />
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <div className="apply-section apply-agree">
               <div className="apply-section__head">
-                <span className="apply-section__title">{sec.title}</span>
-                {sec.note && <span className="apply-section__note">{sec.note}</span>}
+                <span className="apply-section__title">동의</span>
               </div>
-              <div className="apply-section__fields">
-                {sec.fields.map((def) => (
-                  <Field key={def[0]} def={def} required={sec.required} values={values} set={set} setFile={setFile} />
-                ))}
-              </div>
+              <button
+                type="button"
+                role="checkbox"
+                aria-checked={agreed}
+                className={`apply-agree__item${agreed ? ' is-checked' : ''}`}
+                onClick={() => set('agreePriv', !agreed)}
+              >
+                <Checkbox checked={agreed} />
+                <div>
+                  <strong>개인정보 수집·이용 동의 <span className="apply-star">(필수)</span></strong>
+                  <span>
+                    <span className="desktop-only">수집 목적: 접수·연락·안전관리·운영 · 행사 종료 후 파기</span>
+                    <span className="mobile-only">목적: 접수·연락·안전관리·운영</span>
+                  </span>
+                </div>
+              </button>
+              <button
+                type="button"
+                role="checkbox"
+                aria-checked={!!values.agreePhoto}
+                className={`apply-agree__item${values.agreePhoto ? ' is-checked' : ''}`}
+                onClick={() => set('agreePhoto', !values.agreePhoto)}
+              >
+                <Checkbox checked={!!values.agreePhoto} />
+                <div>
+                  <strong>사진·영상 촬영 및 홍보 활용 동의 <span className="apply-optional">(선택)</span></strong>
+                  <span>
+                    <span className="desktop-only">행사 기록 및 홍보물·SNS 게시에 활용 · </span>동의하지 않아도 참가할 수 있어요
+                  </span>
+                </div>
+              </button>
             </div>
-          ))}
 
-          <div className="apply-section apply-agree">
-            <div className="apply-section__head">
-              <span className="apply-section__title">동의</span>
+            <div className="apply-submit">
+              {p.early && <span className="apply-submit__early">모집인원 마감 시 조기마감될 수 있습니다</span>}
+              <button type="submit" className="apply-submit__button" disabled={!canSubmit || submitting}>
+                {submitting ? '신청 중…' : '신청하기'}
+              </button>
+              {submitError && (
+                <p className="apply-submit__error" role="alert">
+                  {submitError}
+                </p>
+              )}
+              <span className="apply-submit__hint">
+                {canSubmit
+                  ? '신청 완료 후 입력하신 연락처로 접수 확인 문자가 발송됩니다.'
+                  : '필수 항목(*)을 모두 입력하고 개인정보 수집·이용에 동의하면 신청할 수 있어요.'}
+              </span>
             </div>
-            <button
-              type="button"
-              role="checkbox"
-              aria-checked={agreed}
-              className={`apply-agree__item${agreed ? ' is-checked' : ''}`}
-              onClick={() => set('agreePriv', !agreed)}
-            >
-              <Checkbox checked={agreed} />
-              <div>
-                <strong>개인정보 수집·이용 동의 <span className="apply-star">(필수)</span></strong>
-                <span>
-                  <span className="desktop-only">수집 목적: 접수·연락·안전관리·운영 · 행사 종료 후 파기</span>
-                  <span className="mobile-only">목적: 접수·연락·안전관리·운영</span>
-                </span>
-              </div>
-            </button>
-            <button
-              type="button"
-              role="checkbox"
-              aria-checked={!!values.agreePhoto}
-              className={`apply-agree__item${values.agreePhoto ? ' is-checked' : ''}`}
-              onClick={() => set('agreePhoto', !values.agreePhoto)}
-            >
-              <Checkbox checked={!!values.agreePhoto} />
-              <div>
-                <strong>사진·영상 촬영 및 홍보 활용 동의 <span className="apply-optional">(선택)</span></strong>
-                <span>
-                  <span className="desktop-only">행사 기록 및 홍보물·SNS 게시에 활용 · </span>동의하지 않아도 참가할 수 있어요
-                </span>
-              </div>
-            </button>
-          </div>
-
-          <div className="apply-submit">
-            {p.early && <span className="apply-submit__early">모집인원 마감 시 조기마감될 수 있습니다</span>}
-            <button type="submit" className="apply-submit__button" disabled={!canSubmit || submitting}>
-              {submitting ? '신청 중…' : '신청하기'}
-            </button>
-            {submitError && (
-              <p className="apply-submit__error" role="alert">
-                {submitError}
-              </p>
-            )}
-            <span className="apply-submit__hint">
-              {canSubmit
-                ? '신청 완료 후 입력하신 연락처로 접수 확인 문자가 발송됩니다.'
-                : '필수 항목(*)을 모두 입력하고 개인정보 수집·이용에 동의하면 신청할 수 있어요.'}
-            </span>
-          </div>
-        </form>
+          </form>
+        )}
       </div>
     </>
   )
@@ -684,8 +721,8 @@ function ApplyDone({ p }: { p: Program }) {
             <Steps p={p} compact />
             <Tables p={p} compact />
             <span className="apply-done__contact">
-              문의 · 용담1동<span className="desktop-only">주민센터</span> 064-728-4592 · 용담2동
-              <span className="desktop-only">주민센터</span> 064-728-4637
+              문의 · 이메일: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> · 전화번호:{' '}
+              <a href={`tel:${CONTACT_TEL.replace(/\D/g, '')}`}>{CONTACT_TEL}</a>
             </span>
           </div>
         </div>

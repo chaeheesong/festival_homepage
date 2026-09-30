@@ -117,6 +117,11 @@
   gap: 16px;
 }
 
+/* Mobile-only note above the program info */
+.apply-save-hint {
+  display: none;
+}
+
 /* ---------- Info / notice / steps / tables ---------- */
 
 .apply-info {
@@ -661,6 +666,49 @@
   color: var(--slate);
 }
 
+/* ---------- Closed ---------- */
+
+.apply-closed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 56px 40px;
+  border-radius: 16px;
+  background: #fff;
+  text-align: center;
+}
+
+.apply-closed__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #c9cde0;
+  font-weight: 800;
+  font-size: 30px;
+  color: #fff;
+}
+
+.apply-closed h2 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 28px;
+}
+
+.apply-closed p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--slate);
+}
+
+.apply-closed .apply-done__home {
+  max-width: 360px;
+  margin-top: 8px;
+}
+
 /* ---------- Done ---------- */
 
 .apply-done {
@@ -990,6 +1038,12 @@
   text-align: center;
 }
 
+.apply-done__contact a {
+  color: inherit;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
 .apply-done__home {
   display: flex;
   align-items: center;
@@ -1064,6 +1118,19 @@
 
   .apply-aside {
     gap: 12px;
+  }
+
+  .apply-save-hint {
+    display: block;
+    padding: 0 4px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--slate);
+  }
+
+  .apply-save-hint::before {
+    content: 'ⓘ ';
+    color: var(--blue);
   }
 
   .apply-info {
@@ -1248,6 +1315,19 @@
 
   .apply-submit__hint {
     font-size: 12px;
+  }
+
+  .apply-closed {
+    padding: 40px 18px;
+    border-radius: 14px;
+  }
+
+  .apply-closed h2 {
+    font-size: 22px;
+  }
+
+  .apply-closed p {
+    font-size: 14px;
   }
 
   /* Done */

@@ -115,12 +115,24 @@
 }
 
 .hero__bg {
+  /* Never wider than the photo's own width: on larger screens it stays at its
+     original size in the middle and its edges fade into the navy background */
+  --fade: clamp(0px, 100vw - var(--photo-width, 100vw), 160px);
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  left: 50%;
+  width: min(100%, var(--photo-width, 100%));
   height: 100%;
+  transform: translateX(-50%);
   object-fit: cover;
   pointer-events: none;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--fade),
+    #000 calc(100% - var(--fade)),
+    transparent
+  );
 }
 
 .hero__content {
@@ -332,6 +344,11 @@
   transition: background-color 0.15s, color 0.15s;
 }
 
+.program-card.is-closed .program-card__button {
+  border-color: #c9cde0;
+  color: #8a90a8;
+}
+
 /* Desktop hover: blue outline, light blue fill, filled button */
 @media (hover: hover) and (min-width: 769px) {
   .program-card {
@@ -344,7 +361,7 @@
     background: #e6ecfa;
   }
 
-  .program-card:hover .program-card__button {
+  .program-card:not(.is-closed):hover .program-card__button {
     background: var(--navy-800);
     color: #fff;
   }
@@ -514,12 +531,16 @@
 }
 
 .experience-card__bg img {
+  /* Keeps the photo's own aspect ratio (never stretched) and pins it to the right;
+     wider cards only widen the white fade on the left */
   position: absolute;
-  left: var(--crop-left);
   top: var(--crop-top);
-  width: var(--crop-width);
+  right: 0;
+  width: auto;
   height: var(--crop-height);
   max-width: none;
+  /* Blend the photo's left edge into the card instead of showing a seam */
+  mask-image: linear-gradient(to right, transparent, #000 40%);
 }
 
 .experience-card__bg::after {
@@ -822,8 +843,16 @@
   .hero__content {
     margin: 54.7px 0;
     gap: 12px;
+    width: 100%;
     padding: 64px 20px 36px;
-    background: radial-gradient(ellipse 60% 60% at 50% 40%, rgb(1, 15, 62) 0%, rgba(1, 15, 62, 0) 100%);
+    /* closest-side: fully transparent before it reaches the box edges, so no visible cut */
+    background: radial-gradient(
+      ellipse closest-side at 50% 45%,
+      rgba(1, 15, 62, 0.95) 0%,
+      rgba(1, 15, 62, 0.75) 35%,
+      rgba(1, 15, 62, 0.35) 65%,
+      rgba(1, 15, 62, 0) 100%
+    );
   }
 
   .hero__meta {
@@ -1083,9 +1112,14 @@
 
   .experience-card__bg img {
     inset: 0;
+    right: 0;
     width: 100%;
+    mask-image: none;
     height: 100%;
     object-fit: cover;
+    /* Anchor to the bottom: on wider phones the extra is cropped from the top, never the bottom.
+       --mobile-shift-y nudges a photo lower (set per card in data.ts) */
+    object-position: center calc(100% + var(--mobile-shift-y, 0px));
   }
 
   .experience-card__bg::after {

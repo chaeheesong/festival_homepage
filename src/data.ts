@@ -92,15 +92,18 @@ export const experiences = [
     description: '나만의 여의주를 꾸며 보아요',
     image: `${IMAGE_DIR}/experience-yeouiju.png`,
     mobileImage: `${IMAGE_DIR}/experience-yeouiju-mobile.png`,
-    // Figma crop of the desktop background image, relative to the card
-    crop: { left: '23.82%', top: '-98.5%', width: '76.11%', height: '227.28%' },
+    // Figma crop of the desktop background image: vertical position/size relative to the
+    // card; the width follows the image's own ratio and it is anchored to the card's right edge
+    crop: { top: '-98.5%', height: '227.28%' },
+    // Mobile: move the photo down within its card (positive = lower)
+    mobileShiftY: '10px',
   },
   {
     title: '소원수 체험',
     description: '소원수 유리병에 소원을 적어보아요',
     image: `${IMAGE_DIR}/experience-wish.png`,
     mobileImage: `${IMAGE_DIR}/experience-wish-mobile.png`,
-    crop: { left: '32.75%', top: '-56.25%', width: '67.18%', height: '200.63%' },
+    crop: { top: '-56.25%', height: '200.63%' },
   },
 ]
 
