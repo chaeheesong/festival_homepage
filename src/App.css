@@ -198,7 +198,7 @@
   gap: 14px;
   margin-top: 22px; /* 40px total with the parent gap */
   /* Nudged lower without changing the hero height */
-  transform: translateY(24px);
+  transform: translateY(44px);
 }
 
 .hero__lineup-label {
@@ -227,7 +227,7 @@
 /* Thin black outline so the names and "출연" stay readable on the bright photo */
 .hero__lineup-label,
 .hero__artists li span {
-  -webkit-text-stroke: 0.5px #000000;
+  -webkit-text-stroke: 0.8px #000000;
   paint-order: stroke fill;
 }
 
@@ -254,6 +254,13 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
+}
+
+/* Recruit heading in Pretendard (other section headings stay in MaruBuri) */
+.recruit__title {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .recruit__deadline {
@@ -736,8 +743,10 @@
   gap: 18.9px;
 }
 
+/* Same sizes as the 프로그램 시간표 / 10월 31일 토요일 heading pair */
 .location__info .heading-serif {
   margin-top: 8px;
+  font-size: 25px;
 }
 
 .location__address {
@@ -977,7 +986,7 @@
   .hero__lineup {
     gap: 10px;
     margin-top: 16px; /* 28px total with the parent gap */
-    transform: translateY(16px);
+    transform: translateY(30px);
   }
 
   .hero__lineup-label {
@@ -1278,7 +1287,7 @@
 
   .location__info .heading-serif {
     margin-top: 6px;
-    font-size: 24px;
+    font-size: 18px;
     letter-spacing: 0;
   }
 

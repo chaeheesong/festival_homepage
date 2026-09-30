@@ -42,12 +42,12 @@ export type Program = {
 }
 
 export const programs: Program[] = [
-  { no: '01', apply: 'walk', title: '용의 산책', description: '“용띠들 모여라” 퍼레이드', capacity: '선착순 70명' },
+  { no: '01', apply: 'walk', title: '용의 산책', description: '“용띠들 모여라” 퍼레이드', capacity: '선착순 60명' },
   { no: '02', apply: 'culture', title: '예술의 물결', capacity: '8팀 선정' },
   { no: '03', apply: 'busking', title: '찾아가는 버스킹', capacity: '6팀 선정' },
   { no: '04', apply: 'song', title: '용연가요제', capacity: '8팀 선정' },
-  { no: '05', apply: 'runner', title: '드래곤러너', capacity: '선착순 150명', note: '마감 후 현장 신청' },
-  { no: '06', apply: 'stamp', title: '찾아라 드래곤볼', description: '스탬프투어' },
+  { no: '05', apply: 'runner', title: '드래곤러너', capacity: '선착순 150명' },
+  { no: '06', apply: 'stamp', title: '찾아라 드래곤볼', capacity: '선착순 150명', note: '마감 후 현장 신청' },
 ]
 
 export type Wave = {

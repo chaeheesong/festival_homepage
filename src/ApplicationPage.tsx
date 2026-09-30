@@ -576,7 +576,6 @@ function ApplyForm({
   return (
     <>
       <section className="apply-hero">
-        <span className="apply-hero__eyebrow">참가신청</span>
         <h1>{p.name}</h1>
         <span className="apply-hero__sub">{p.sub}</span>
         <div className="apply-hero__badges">

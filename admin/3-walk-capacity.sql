@@ -1,13 +1,13 @@
--- 용의 산책 인원 제한: 희망 행렬 노선(용담1동 / 용담2동)별 참가인원 합계 35명까지
+-- 용의 산책 인원 제한: 희망 행렬 노선(용담1동 / 용담2동)별 참가인원 합계 30명까지
 -- Supabase → SQL Editor → New query 에 통째로 붙여 넣고 Run (여러 번 실행해도 괜찮습니다)
--- 인원을 바꾸려면 아래 walk_capacity() 의 35 를 고친 뒤 다시 Run
+-- 인원을 바꾸려면 아래 walk_capacity() 의 30 을 고친 뒤 다시 Run
 
 create schema if not exists private;
 revoke all on schema private from anon, authenticated;
 
 -- 노선별 정원
 create or replace function private.walk_capacity()
-returns int language sql immutable as $$ select 35 $$;
+returns int language sql immutable as $$ select 30 $$;
 
 -- 신청 1건의 참가인원 (본인 포함, 숫자만 추출 / 없으면 1명)
 create or replace function private.walk_people(answers jsonb)

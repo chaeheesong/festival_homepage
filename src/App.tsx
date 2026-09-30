@@ -100,7 +100,7 @@ function Recruit() {
   return (
     <section id="apply" className="recruit">
       <div className="recruit__head">
-        <h2 className="heading-serif">함께할 참가자를 모집합니다</h2>
+        <h2 className="heading-serif recruit__title">함께할 참가자를 모집합니다</h2>
         <div className="recruit__deadline">
           <span className="recruit__deadline-label">신청 기간</span>
           <span className="recruit__deadline-date">{APPLY_PERIOD_LABEL}</span>
@@ -268,7 +268,7 @@ function Location() {
       </a>
       <div className="location__info">
         <div className="location__heading">
-          <p className="section-eyebrow section-eyebrow--small">오시는 길</p>
+          <p className="section-eyebrow">오시는 길</p>
           <h2 className="heading-serif">용담이동 461</h2>
         </div>
         <p className="location__address">
