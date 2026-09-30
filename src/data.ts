@@ -46,7 +46,7 @@ export const programs: Program[] = [
   { no: '02', apply: 'culture', title: '예술의 물결', capacity: '8팀 선정' },
   { no: '03', apply: 'busking', title: '찾아가는 버스킹', capacity: '6팀 선정' },
   { no: '04', apply: 'song', title: '용연가요제', capacity: '8팀 선정' },
-  { no: '05', apply: 'runner', title: '드래곤러너', description: '야간 러닝 · 누구나 참가' },
+  { no: '05', apply: 'runner', title: '드래곤러너', capacity: '선착순 150명', note: '마감 후 현장 신청' },
   { no: '06', apply: 'stamp', title: '찾아라 드래곤볼', description: '스탬프투어' },
 ]
 
@@ -54,6 +54,7 @@ export type Wave = {
   label: string
   theme?: string
   color: string
+  /** detail: a "\n" starts a new line */
   items: { title: string; time: string; detail: string }[]
 }
 
@@ -72,8 +73,13 @@ export const waves: Wave[] = [
     theme: '참여와 문화',
     color: '#5fc9ba',
     items: [
-      { title: '예술의 물결', time: '12:00 ~ 15:00', detail: '용담1·2동 동아리 및 청소년팀' },
-      { title: '화합의 물결', time: '15:00 ~ 16:00', detail: '용연 ‘청룡vs황룡’ 줄다리기' },
+      { title: '리허설', time: '12:00 ~ 13:00', detail: '예술의 물결 공연팀 리허설' },
+      { title: '예술의 물결', time: '13:00 ~ 15:00', detail: '용담1·2동 동아리 및 청소년팀' },
+      {
+        title: '화합의 물결',
+        time: '15:00 ~ 16:00',
+        detail: '15:00 ~ 15:30 용연 ‘황룡vs청룡’ 줄다리기\n15:30 ~ 16:00 참여 이벤트 (OX퀴즈)',
+      },
       { title: '환호의 물결', time: '16:00 ~ 17:00', detail: '용연 가요제' },
     ],
   },
@@ -82,8 +88,8 @@ export const waves: Wave[] = [
     theme: '미래와 음악',
     color: '#a58bff',
     items: [
-      { title: '축하 공연', time: '17:00 ~ 18:00', detail: '초청 아티스트 축하 공연' },
-      { title: '개막식', time: '18:00 ~ 18:30', detail: '인사말씀, 개막 퍼포먼스' },
+      { title: '축하 공연', time: '17:00 ~ 18:00', detail: '축하 공연' },
+      { title: '개막식', time: '18:00 ~ 18:30', detail: '개막 퍼포먼스' },
       { title: '용연 음악회', time: '18:30 ~ 21:00', detail: '어린이합창단, 고강민, 우연이, 먼데이키즈, 장민호' },
     ],
   },

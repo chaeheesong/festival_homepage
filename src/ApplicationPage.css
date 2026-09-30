@@ -789,6 +789,12 @@
   font-size: 28px;
 }
 
+.apply-closed__note {
+  white-space: pre-line;
+  font-weight: 600;
+  color: var(--navy-800);
+}
+
 .apply-closed p {
   font-size: 15px;
   line-height: 1.7;

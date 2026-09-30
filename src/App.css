@@ -506,6 +506,7 @@
 }
 
 .timetable__row .col-detail {
+  white-space: pre-line;
   font-size: 15px;
   line-height: 24px;
   color: rgba(243, 244, 249, 0.82);
@@ -675,10 +676,13 @@
 }
 
 .location__area polygon {
-  fill: rgba(242, 178, 51, 0.38);
-  stroke: #e0a21b;
-  stroke-width: 3;
+  /* Same blue as the pin; a white halo keeps the edge crisp on the green park */
+  fill: rgba(47, 88, 201, 0.28);
+  stroke: #2f58c9;
+  stroke-width: 5;
   stroke-linejoin: round;
+  paint-order: stroke;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95));
 }
 
 .location__marker {

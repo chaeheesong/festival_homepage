@@ -35,8 +35,8 @@ export type Program = {
   notice?: string
   /** [title, description] */
   steps?: [string, string][]
-  /** Heading of the steps box (default: 참가방법) */
-  stepsTitle?: string
+  /** Recruitment timeline, shown as its own "일정" box above 참가방법 */
+  schedule?: [string, string][]
   tables?: Table[]
   /** Ask for companion names based on the headcount */
   mates?: boolean
@@ -51,7 +51,9 @@ export type Program = {
    * Headcount limit enforced by the database (see admin/3-walk-capacity.sql):
    * `rpc` returns seats left per option of `groupField`; `countField` is the party size
    */
-  capacity?: { rpc: string; groupField: string; countField: string }
+  capacity?: { rpc: string; groupField?: string; countField: string }
+  /** Message shown instead of the form once every seat is taken */
+  fullNote?: string
   /** Light-colored notes shown next to field labels, by field key */
   hints?: Record<string, string>
   /** Place shown in the done-screen summary (default: 메인 무대) */
@@ -85,6 +87,16 @@ export const PHOTO_TERMS: ConsentTerm[] = [
   ['개인정보제공', '사진·영상촬영 및 홍보 활용 동의'],
 ]
 
+/** Shared recruitment timeline for the performance programs (예술의 물결, 찾아가는 버스킹, 용연가요제) */
+const RECRUIT_SCHEDULE: [string, string][] = [
+  ['참가팀 공개모집', '10월 1일 ~ 13일'],
+  ['온라인 심사', '10월 16일'],
+  ['선정팀 발표', '10월 19일'],
+  ['공연자료 및 장비 요청 마감', '10월 21일'],
+]
+
+const COUNT_1_10 = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+
 const YONG = ['1940', '1952', '1964', '1976', '1988', '2000', '2012', '2024']
 const COUNT = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '기타']
 const AGES = ['10대 미만', '10대', '20대', '30대', '40대', '50대', '60대 이상']
@@ -106,7 +118,7 @@ export const PROGRAMS = {
       ['일시', '2026. 10. 31.(토) 오전 10:00 ~ 11:00', '※ 오전 9시 50분까지 해당 동사무소에 도착해 인원 체크를 합니다.'],
       ['장소', '용담1동 동사무소 또는 용담2동 동사무소'],
       ['참가대상', '용띠라면 누구나 (어린이~성인·가족 가능)'],
-      ['참가비', '기념품 지급'],
+      ['참가자', '기념품 지급'],
       ['모집인원', '용담1동 35명 / 용담2동 35명'],
     ],
     req: [
@@ -137,7 +149,7 @@ export const PROGRAMS = {
       ['참가비', '무료 · 완주 시 기념품', '※ 기념품은 준비수량에 따라 조기 소진될 수 있습니다.'],
     ],
     steps: [
-      ['사전접수', 'QR코드로 참가신청'],
+      ['사전접수', ''],
       ['스탬프북 수령', '행사 당일 운영본부에서 신청자 확인 후 스탬프북 수령'],
       ['7대 명소 자유 탐방', '지도를 보고 원하는 순서대로 명소 방문'],
       ['스탬프 미션 수행', '각 장소에서 스탬프 또는 인증미션 완료'],
@@ -151,7 +163,7 @@ export const PROGRAMS = {
       ['count', '참가인원 (본인 포함 총원)', 'select', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']],
       ['type', '참가형태', 'choice', TYPE4],
       ['area', '거주지역', 'choice', ['용담1동', '용담2동', '제주시 기타', '도외·관광객']],
-      ['time', '예상 방문시간대', 'choice', ['11:00~13:00', '13:00~15:00', '15:00~17:30']],
+      ['time', '예상 방문시간대', 'choice', ['11:00~13:00', '13:00~15:00']],
     ],
     when: '2026. 10. 31.(토) 11:00~17:30',
     where: '운영본부 (스탬프북 수령)',
@@ -160,13 +172,15 @@ export const PROGRAMS = {
   runner: {
     name: '드래곤 러너',
     sub: '용담의 해안길을 달리는 특별한 러닝 참가자 모집 (자유러닝)',
-    cap: '누구나 참가',
+    cap: '선착순 150명',
+    early: true,
     info: [
       ['일시', '2026. 10. 31.(토) 18:30~20:30\n마지막 출발 19:30\n도착 완주 확인 20:30까지'],
       ['집결', '드래곤러너 안내부스 (용연구름다리 일대)'],
       ['참가비', '무료\n완주 기념품 지급 (선착순 150명까지)'],
     ],
-    notice: '어린이·청소년 참가 시 보호자 동반이 필수입니다.',
+    notice:
+      '온라인 사전접수는 선착순 150명까지 받습니다. 마감 후에는 행사 당일 드래곤러너 안내부스에서 현장 신청해 주세요.\n어린이·청소년 참가 시 보호자 동반이 필수입니다.',
     steps: [
       ['드래곤러너 안내부스 집결', '사전접수자 이름 또는 연락처 확인'],
       ['참가자 등록', '야광팔찌 지급'],
@@ -181,6 +195,7 @@ export const PROGRAMS = {
       ['tel', '연락처', 'tel', '010-0000-0000'],
       ['age', '연령대', 'choice', AGES],
       ['type', '참가구분', 'choice', TYPE4],
+      ['count', '참가인원 (본인 포함)', 'select', COUNT_1_10],
       ['sos', '비상연락처', 'tel', '010-0000-0000'],
       ['exp', '러닝 경험', 'choice', ['처음', '가끔', '정기적']],
       [
@@ -198,12 +213,11 @@ export const PROGRAMS = {
       ['safe', '안전수칙을 확인했습니다', 'check'],
       ['cond', '본인의 컨디션을 확인하고 무리하지 않겠습니다', 'check'],
     ],
-    opt: [
-      ['area', '거주지역', 'text', '예: 용담2동'],
-      ['mates', '동반 참가인원', 'select', ['0', '1', '2', '3', '4', '5', '기타']],
-    ],
+    opt: [['area', '거주지역', 'text', '예: 용담2동']],
     minor: (v) => v.age === '10대 미만' || v.age === '10대',
     guardNote: '보호자 동반 필수',
+    capacity: { rpc: 'runner_remaining', countField: 'count' },
+    fullNote: '온라인 사전접수(선착순 150명)가 마감되었습니다.\n행사 당일 드래곤러너 안내부스에서 현장 신청해 주세요.',
     when: '2026. 10. 31.(토) 18:30~20:30',
     where: '드래곤러너 안내부스',
     doneNote: '당일 안내부스에서 야광팔찌를 받아 주세요.',
@@ -213,13 +227,14 @@ export const PROGRAMS = {
     sub: '용담1·2동 동아리 및 청소년 공연팀 공개 모집',
     cap: '8팀 선정',
     early: true,
+    schedule: RECRUIT_SCHEDULE,
     info: [
       ['공연 일시', '2026. 10. 31.(토) 13:00~15:00'],
       ['장소', '용연 구름다리 일대 메인무대'],
       ['모집분야', '노래·밴드·댄스·난타·악기연주·퍼포먼스 등 (장르 제한 없음)'],
       ['모집규모', '8팀 (용담1동 3팀 / 용담2동 3팀 / 청소년팀 2팀)'],
-      ['참가 시상금', '300,000원'],
-      ['선정방법', '10. 19. 온라인 심사 후 개별 연락으로 결과 발표'],
+      ['선정팀 공연비', '300,000원'],
+      ['결과발표', '10. 19. 결과 개별 안내'],
     ],
     tables: [
       {
@@ -265,13 +280,7 @@ export const PROGRAMS = {
       ['선정팀 공연비', '200,000원'],
     ],
     notice: '공연 장소 및 세부 출연 시간은 선정 후 안내합니다.\n사전 버스킹은 경연이 아닌 축제 홍보 공연으로 진행됩니다.',
-    stepsTitle: '일정',
-    steps: [
-      ['참가팀 공개모집', '10월 1일 ~ 13일'],
-      ['온라인 심사', '10월 16일'],
-      ['선정팀 발표', '10월 19일'],
-      ['공연자료 및 장비 요청 마감', '10월 21일'],
-    ],
+    schedule: RECRUIT_SCHEDULE,
     tables: [
       {
         title: '심사 기준',
@@ -302,6 +311,7 @@ export const PROGRAMS = {
     name: '용연가요제',
     sub: '용연가요제 참가자 공개 모집',
     cap: '본선 8팀',
+    schedule: RECRUIT_SCHEDULE,
     info: [
       ['모집대상', '노래를 좋아하는 누구나'],
       ['본선', '2026. 10. 31.(토) 16:00~17:00'],
@@ -312,7 +322,7 @@ export const PROGRAMS = {
     ],
     notice: '기성가수, 음반발매자, 타 가요제 대상 수상자 등은 참가할 수 없습니다.',
     steps: [
-      ['온라인 참가신청', 'QR코드 접속 후 참가정보 입력'],
+      ['온라인 참가신청', ''],
       ['노래 영상 제출', '본인이 직접 노래하는 영상을 제출해 주세요.'],
       ['온라인 영상 예선심사', '제출한 참가영상으로 심사 진행'],
       ['본선 8팀 선정', '선정자에게 개별 연락'],

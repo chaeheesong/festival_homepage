@@ -392,22 +392,28 @@ function InfoRows({ p, compact }: { p: Program; compact?: boolean }) {
 }
 
 function Steps({ p, compact }: { p: Program; compact?: boolean }) {
-  if (!p.steps) return null
+  const boxes: [string, [string, string][]][] = []
+  if (p.schedule) boxes.push(['일정', p.schedule])
+  if (p.steps) boxes.push(['참가방법', p.steps])
   return (
-    <div className={compact ? 'apply-steps apply-steps--compact' : 'apply-steps'}>
-      <span className="apply-box-title">{p.stepsTitle ?? '참가방법'}</span>
-      <ol>
-        {p.steps.map(([t, d], i) => (
-          <li key={t}>
-            <span className="apply-steps__n">{i + 1}</span>
-            <div>
-              <strong>{t}</strong>
-              {d && <span>{d}</span>}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
+    <>
+      {boxes.map(([title, items]) => (
+        <div key={title} className={compact ? 'apply-steps apply-steps--compact' : 'apply-steps'}>
+          <span className="apply-box-title">{title}</span>
+          <ol>
+            {items.map(([t, d], i) => (
+              <li key={t}>
+                <span className="apply-steps__n">{i + 1}</span>
+                <div>
+                  <strong>{t}</strong>
+                  {d && <span>{d}</span>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+    </>
   )
 }
 
@@ -492,15 +498,21 @@ function ConsentItem({
   )
 }
 
-function ApplyClosed({ full = false }: { full?: boolean }) {
+function ApplyClosed({ full = false, fullNote }: { full?: boolean; fullNote?: string }) {
   return (
     <div className="apply-closed">
       <span className="apply-closed__icon" aria-hidden>!</span>
       <h2>{full ? '모집 인원이 모두 찼습니다' : '신청이 마감되었습니다'}</h2>
       <p>
-        {full ? '많은 관심에 감사드립니다.' : `신청 기간: ${APPLY_PERIOD_LABEL}`}
-        <br />
-        {full ? '다른 프로그램도 둘러봐 주세요. 행사 당일 현장에서 만나요!' : '참여해 주셔서 감사합니다. 행사 당일 현장에서 만나요!'}
+        {full && fullNote ? (
+          <span className="apply-closed__note">{fullNote}</span>
+        ) : (
+          <>
+            {full ? '많은 관심에 감사드립니다.' : `신청 기간: ${APPLY_PERIOD_LABEL}`}
+            <br />
+            {full ? '다른 프로그램도 둘러봐 주세요. 행사 당일 현장에서 만나요!' : '참여해 주셔서 감사합니다. 행사 당일 현장에서 만나요!'}
+          </>
+        )}
       </p>
       <a className="apply-done__home" href={MAIN_URL}>메인으로</a>
     </div>
@@ -541,7 +553,8 @@ function ApplyForm({
     if (capacity) fetchRemaining(capacity.rpc).then(setSeats)
   }
   useEffect(loadSeats, [capacity])
-  const group = capacity ? values[capacity.groupField] : undefined
+  // Without a groupField the whole program shares one pool, returned as { 전체: n }
+  const group = capacity ? (capacity.groupField ? values[capacity.groupField] : '전체') : undefined
   const seatsLeft = seats && typeof group === 'string' ? seats[group] : undefined
   const maxSeats = seats ? Math.max(0, ...Object.values(seats)) : undefined
   const maxPeople = seatsLeft ?? maxSeats
@@ -550,7 +563,7 @@ function ApplyForm({
   const people = capacity ? Number(values[capacity.countField] ?? 1) : 0
   useEffect(() => {
     if (!capacity || !seats) return
-    if (typeof group === 'string' && (seats[group] ?? 0) <= 0) set(capacity.groupField, undefined)
+    if (capacity.groupField && typeof group === 'string' && (seats[group] ?? 0) <= 0) set(capacity.groupField, undefined)
     if (maxPeople !== undefined && maxPeople > 0 && people > maxPeople) set(capacity.countField, String(maxPeople))
   }, [capacity, seats, group, maxPeople, people])
 
@@ -583,7 +596,7 @@ function ApplyForm({
         </aside>
 
         {closed || allFull ? (
-          <ApplyClosed full={!closed && allFull} />
+          <ApplyClosed full={!closed && allFull} fullNote={p.fullNote} />
         ) : (
           <form
             className="apply-form"
