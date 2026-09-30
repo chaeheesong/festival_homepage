@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { isApplyClosed } from './applications'
-import { IMAGE_DIR, MAP, MOBILE_QUERY, artists, contacts, experiences, navItems, programs, waves } from './data'
+import { APPLY_PERIOD_LABEL, isApplyClosed } from './applications'
+import { IMAGE_DIR, MAP, MOBILE_QUERY, artists, contacts, experiences, navItems, programs, sidePrograms, waves } from './data'
 import './App.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/jeju_neulpureun?stkn=MTQ0d3VoaXV3YjBrdQ%3D%3D'
-const DIRECTIONS_URL = 'https://naver.me/Fk73m9sb'
+const DIRECTIONS_URL = 'https://naver.me/xAfCEpym'
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -72,7 +72,7 @@ function Hero() {
           <span className="desktop-only">2026. 10. 31. 토요일</span>
           <span className="mobile-only">2026. 10. 31. (토)</span>
           <span className="hero__divider" aria-hidden />
-          <span className="hero__place">용연 구름다리 일대</span>
+          <span className="hero__place">메인 무대</span>
         </div>
         <h1 className="hero__title">
           <span className="desktop-only">용담·용연 음악회·문화제</span>
@@ -102,10 +102,8 @@ function Recruit() {
       <div className="recruit__head">
         <h2 className="heading-serif">함께할 참가자를 모집합니다</h2>
         <div className="recruit__deadline">
-          <span className="recruit__deadline-label">신청 마감</span>
-          <span className="recruit__deadline-date">
-            <span className="desktop-only">2026. </span>10. 20. (화) 18:00
-          </span>
+          <span className="recruit__deadline-label">신청 기간</span>
+          <span className="recruit__deadline-date">{APPLY_PERIOD_LABEL}</span>
         </div>
       </div>
       <ul className="recruit__cards">
@@ -148,7 +146,7 @@ function Schedule() {
           <div key={wave.label} className="timetable__group" role="rowgroup">
             <div className="timetable__wave col-wave">
               <strong style={{ color: wave.color }}>{wave.label}</strong>
-              <span>{wave.theme}</span>
+              {wave.theme && <span>{wave.theme}</span>}
             </div>
             <div className="timetable__rows">
               {wave.items.map((item) => (
@@ -161,6 +159,28 @@ function Schedule() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="schedule__side">
+        <h3 className="schedule__side-title">부대 프로그램</h3>
+        <div className="timetable timetable--side" role="table" aria-label="부대 프로그램">
+          <div className="timetable__header" role="row">
+            <span role="columnheader" className="col-title">프로그램</span>
+            <span role="columnheader" className="col-time">시간</span>
+            <span role="columnheader" className="col-detail">내용</span>
+          </div>
+          <div className="timetable__group" role="rowgroup">
+            <div className="timetable__rows">
+              {sidePrograms.map((item) => (
+                <div key={item.title} className="timetable__row" role="row">
+                  <span role="cell" className="col-title">{item.title}</span>
+                  <span role="cell" className="col-time">{item.time}</span>
+                  <span role="cell" className="col-detail">{item.detail}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -195,6 +215,20 @@ function Experience() {
           </article>
         ))}
       </div>
+      <ul className="experience__more">
+        <li>
+          <span className="experience__more-badge">+20</span>
+          <span>
+            이 외에도 <strong>20개의 체험 부스</strong>가 더 운영됩니다
+          </span>
+        </li>
+        <li>
+          <span className="experience__more-badge">KIDS</span>
+          <span>
+            <strong>키즈존</strong>도 별도로 운영합니다
+          </span>
+        </li>
+      </ul>
     </section>
   )
 }
@@ -207,15 +241,23 @@ function Location() {
         href={MAP.kakaoUrl}
         target="_blank"
         rel="noreferrer"
-        aria-label="카카오맵에서 용연 구름다리 위치 보기"
+        aria-label="카카오맵에서 메인 무대 위치 보기"
       >
         <div
           className="location__map-canvas"
           style={{ '--map-ratio': MAP.width / MAP.height } as CSSProperties}
         >
-          <img src={MAP.image} alt="용연 구름다리 일대 약도" />
+          <img src={MAP.image} alt="메인 무대 약도" />
+          <svg
+            className="location__area"
+            viewBox={`0 0 ${MAP.width} ${MAP.height}`}
+            preserveAspectRatio="none"
+            aria-hidden
+          >
+            <polygon points={MAP.area} />
+          </svg>
           <span className="location__marker" style={{ left: MAP.marker.x, top: MAP.marker.y }}>
-            <span className="location__marker-label">용연 구름다리</span>
+            <span className="location__marker-label">공연 장소</span>
             <svg width="28" height="36" viewBox="0 0 28 36" aria-hidden>
               <path d="M14 0C6.27 0 0 6.13 0 13.7 0 24 14 36 14 36s14-12 14-22.3C28 6.13 21.73 0 14 0Z" fill="#2f58c9" />
               <circle cx="14" cy="13.5" r="5" fill="#fff" />
@@ -227,12 +269,10 @@ function Location() {
       <div className="location__info">
         <div className="location__heading">
           <p className="section-eyebrow section-eyebrow--small">오시는 길</p>
-          <h2 className="heading-serif">용연 구름다리 일대</h2>
+          <h2 className="heading-serif">용담이동 461</h2>
         </div>
         <p className="location__address">
-          제주특별자치도 제주시 용담1동
-          <br />
-          용연 구름다리 일대
+          제주특별자치도 제주시 용담이동 461
         </p>
         <a
           className="pill-button pill-button--shadow location__button"
@@ -240,7 +280,7 @@ function Location() {
           target="_blank"
           rel="noreferrer"
         >
-          길찾기
+          길찾기 (네이버 지도)
         </a>
       </div>
     </section>

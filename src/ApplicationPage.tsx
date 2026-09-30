@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { toBlob } from 'html-to-image'
 import {
-  APPLY_DEADLINE_LABEL,
+  APPLY_PERIOD_LABEL,
   CONTACT_EMAIL,
   CONTACT_TEL,
   GUARDIAN_FIELDS,
+  PHOTO_TERMS,
+  PRIVACY_TERMS,
   PROGRAMS,
   VIDEO_EMAIL,
   isApplyClosed,
 } from './applications'
-import { submitApplication } from './submitApplication'
-import type { FieldDef, FieldType, FormValues, Program, ProgramKey } from './applications'
+import { CapacityError, fetchRemaining, submitApplication } from './submitApplication'
+import type { ConsentTerm, FieldDef, FieldType, FormValues, Program, ProgramKey } from './applications'
 import './ApplicationPage.css'
 
 const MAIN_URL = './'
@@ -43,6 +45,8 @@ function buildSections(p: Program, v: FormValues): Section[] {
 const NAME_INPUT_BLOCKED = /[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z ]/g
 const NAME_VALID = /^[가-힣a-zA-Z]+( [가-힣a-zA-Z]+)*$/
 const PHONE_VALID = /^(02-\d{3,4}|0\d{2}-\d{3,4})-\d{4}$/
+
+const digitsOf = (value: string) => value.replace(/\D/g, '')
 
 /** Formats digits as 010-1234-5678 / 064-728-4592 / 02-123-4567 */
 function formatPhone(input: string) {
@@ -108,11 +112,17 @@ type FieldProps = {
   values: FormValues
   set: (key: string, value: string | boolean | undefined) => void
   setFile: (key: string, file: File) => void
+  /** Seats left per choice option; options with 0 are shown as full */
+  seats?: Record<string, number>
+  /** Highest selectable number in a headcount dropdown */
+  maxOption?: number
+  /** Light-colored note next to the label */
+  hint?: string
 }
 
 const MAX_FILE_MB = 10
 
-function Field({ def: [key, label, type, extra], required, values, set, setFile }: FieldProps) {
+function Field({ def: [key, label, type, extra], required, values, set, setFile, seats, maxOption, hint }: FieldProps) {
   const fileInput = useRef<HTMLInputElement>(null)
   const [fileError, setFileError] = useState<string | null>(null)
   // Format errors show only after leaving the field, not mid-typing
@@ -124,10 +134,12 @@ function Field({ def: [key, label, type, extra], required, values, set, setFile 
   const id = `field-${key}`
 
   return (
-    <div className={`apply-field${FULL_WIDTH_TYPES.includes(type) ? ' apply-field--full' : ''}`}>
+    // A field with a side note gets the full row so the note stays on the label's line
+    <div className={`apply-field${FULL_WIDTH_TYPES.includes(type) || hint ? ' apply-field--full' : ''}`}>
       {type !== 'check' && (
         <label className="apply-label" htmlFor={id}>
           {label} {required && type !== 'rules' && <span className="apply-star">*</span>}
+          {hint && <span className="apply-label__hint">{hint}</span>}
         </label>
       )}
 
@@ -140,6 +152,24 @@ function Field({ def: [key, label, type, extra], required, values, set, setFile 
           value={text}
           onChange={(e) => set(key, e.target.value)}
         />
+      )}
+
+      {type === 'number' && (
+        <div className="apply-number">
+          <input
+            id={id}
+            className="apply-input"
+            inputMode="numeric"
+            maxLength={4}
+            placeholder="숫자만 입력"
+            value={digitsOf(text)}
+            onChange={(e) => {
+              const d = digitsOf(e.target.value)
+              set(key, d ? `${d}${placeholder}` : undefined)
+            }}
+          />
+          <span className="apply-number__unit">{placeholder}</span>
+        </div>
       )}
 
       {(type === 'name' || type === 'tel') && (
@@ -195,17 +225,27 @@ function Field({ def: [key, label, type, extra], required, values, set, setFile 
             value={text || options[0]}
             onChange={(e) => set(key, e.target.value)}
           >
-            {options.map((o) => (
-              <option key={o} value={o}>{o === '기타' ? '기타 (직접 입력)' : `${o}명`}</option>
-            ))}
+            {options
+              .filter((o) => maxOption === undefined || o === '기타' || Number(o) <= maxOption)
+              .map((o) => (
+                <option key={o} value={o}>{o === '기타' ? '기타 (직접 입력)' : `${o}명`}</option>
+              ))}
           </select>
           {text === '기타' && (
-            <input
-              className="apply-etc-input"
-              placeholder="인원을 직접 입력해 주세요 (예: 12명)"
-              value={String(values[`${key}Etc`] ?? '')}
-              onChange={(e) => set(`${key}Etc`, e.target.value)}
-            />
+            <div className="apply-number apply-number--etc">
+              <input
+                className="apply-etc-input"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="인원을 숫자로 입력해 주세요 (예: 12)"
+                value={digitsOf(String(values[`${key}Etc`] ?? ''))}
+                onChange={(e) => {
+                  const d = digitsOf(e.target.value)
+                  set(`${key}Etc`, d ? `${d}명` : undefined)
+                }}
+              />
+              <span className="apply-number__unit">명</span>
+            </div>
           )}
         </>
       )}
@@ -214,22 +254,29 @@ function Field({ def: [key, label, type, extra], required, values, set, setFile 
         <div className="apply-chips" role="radiogroup" id={id}>
           {options.map((o) => {
             const selected = value === o
+            const left = seats?.[o]
+            const full = left !== undefined && left <= 0
+            const toggle = () => !full && set(key, selected ? undefined : o)
             return (
               <div
                 key={o}
                 role="radio"
                 aria-checked={selected}
-                tabIndex={0}
-                className={`apply-chip${selected ? ' is-selected' : ''}`}
-                onClick={() => set(key, selected ? undefined : o)}
+                aria-disabled={full}
+                tabIndex={full ? -1 : 0}
+                className={`apply-chip${selected ? ' is-selected' : ''}${full ? ' is-full' : ''}`}
+                onClick={toggle}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    set(key, selected ? undefined : o)
+                    toggle()
                   }
                 }}
               >
                 {o}
+                {left !== undefined && (
+                  <span className="apply-chip__seats">{full ? '마감' : `잔여 ${left}명`}</span>
+                )}
                 {o === '기타' && selected && (
                   <input
                     className="apply-chip-input"
@@ -237,7 +284,7 @@ function Field({ def: [key, label, type, extra], required, values, set, setFile 
                     value={String(values[`${key}Etc`] ?? '')}
                     onClick={(e) => e.stopPropagation()}
                     onKeyDown={(e) => e.stopPropagation()}
-                    onChange={(e) => set(`${key}Etc`, e.target.value)}
+                    onChange={(e) => set(`${key}Etc`, e.target.value.replace(NAME_INPUT_BLOCKED, ''))}
                   />
                 )}
               </div>
@@ -348,7 +395,7 @@ function Steps({ p, compact }: { p: Program; compact?: boolean }) {
   if (!p.steps) return null
   return (
     <div className={compact ? 'apply-steps apply-steps--compact' : 'apply-steps'}>
-      <span className="apply-box-title">참가방법</span>
+      <span className="apply-box-title">{p.stepsTitle ?? '참가방법'}</span>
       <ol>
         {p.steps.map(([t, d], i) => (
           <li key={t}>
@@ -405,22 +452,71 @@ function Notice({ p }: { p: Program }) {
   return p.notice ? <div className="apply-notice">{p.notice}</div> : null
 }
 
-function ApplyClosed() {
+/** Required consent checkbox with its terms listed underneath */
+function ConsentItem({
+  checked,
+  onToggle,
+  title,
+  terms,
+  startAt = 1,
+}: {
+  checked: boolean
+  onToggle: () => void
+  title: string
+  terms: ConsentTerm[]
+  startAt?: number
+}) {
+  return (
+    <div className="apply-consent">
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={checked}
+        className={`apply-agree__item${checked ? ' is-checked' : ''}`}
+        onClick={onToggle}
+      >
+        <Checkbox checked={checked} />
+        <strong>
+          {title} <span className="apply-star">(필수)</span>
+        </strong>
+      </button>
+      <ol className="apply-consent__terms" start={startAt}>
+        {terms.map(([k, v, sub]) => (
+          <li key={k}>
+            <b>{k}:</b> {v}
+            {sub && <span className="apply-consent__sub">- {sub}</span>}
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+function ApplyClosed({ full = false }: { full?: boolean }) {
   return (
     <div className="apply-closed">
       <span className="apply-closed__icon" aria-hidden>!</span>
-      <h2>신청이 마감되었습니다</h2>
+      <h2>{full ? '모집 인원이 모두 찼습니다' : '신청이 마감되었습니다'}</h2>
       <p>
-        신청 기간: ~ {APPLY_DEADLINE_LABEL}
+        {full ? '많은 관심에 감사드립니다.' : `신청 기간: ${APPLY_PERIOD_LABEL}`}
         <br />
-        참여해 주셔서 감사합니다. 행사 당일 현장에서 만나요!
+        {full ? '다른 프로그램도 둘러봐 주세요. 행사 당일 현장에서 만나요!' : '참여해 주셔서 감사합니다. 행사 당일 현장에서 만나요!'}
       </p>
       <a className="apply-done__home" href={MAIN_URL}>메인으로</a>
     </div>
   )
 }
 
-function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Program; onDone: () => void }) {
+function ApplyForm({
+  programKey,
+  p,
+  onDone,
+}: {
+  programKey: ProgramKey
+  p: Program
+  /** videoByEmail: the applicant ticked "링크가 없어 이메일로 보내겠습니다" */
+  onDone: (result: { videoByEmail: boolean }) => void
+}) {
   const [closed, setClosed] = useState(() => isApplyClosed())
   // Dropdowns show their first option, so start with that as the stored answer too
   const [values, setValues] = useState<FormValues>(() =>
@@ -437,10 +533,32 @@ function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Progr
   const submittingRef = useRef(false)
   const set = (key: string, value: string | boolean | undefined) => setValues((v) => ({ ...v, [key]: value }))
   const setFile = (key: string, file: File) => setFiles((f) => ({ ...f, [key]: file }))
+
+  // Headcount limits (용의 산책): seats left per group, from the database
+  const capacity = p.capacity
+  const [seats, setSeats] = useState<Record<string, number> | null>(null)
+  const loadSeats = () => {
+    if (capacity) fetchRemaining(capacity.rpc).then(setSeats)
+  }
+  useEffect(loadSeats, [capacity])
+  const group = capacity ? values[capacity.groupField] : undefined
+  const seatsLeft = seats && typeof group === 'string' ? seats[group] : undefined
+  const maxSeats = seats ? Math.max(0, ...Object.values(seats)) : undefined
+  const maxPeople = seatsLeft ?? maxSeats
+  const allFull = maxSeats === 0
+  // Keep the answers within what is left: drop a group that filled up, shrink the party size
+  const people = capacity ? Number(values[capacity.countField] ?? 1) : 0
+  useEffect(() => {
+    if (!capacity || !seats) return
+    if (typeof group === 'string' && (seats[group] ?? 0) <= 0) set(capacity.groupField, undefined)
+    if (maxPeople !== undefined && maxPeople > 0 && people > maxPeople) set(capacity.countField, String(maxPeople))
+  }, [capacity, seats, group, maxPeople, people])
+
   const agreed = !!values.agreePriv
   const sections = buildSections(p, values)
+  const photoAgreed = !!values.agreePhoto
   const canSubmit =
-    agreed && sections.every((sec) => !sec.required || sec.fields.every((def) => isAnswered(def, values)))
+    agreed && photoAgreed && sections.every((sec) => !sec.required || sec.fields.every((def) => isAnswered(def, values)))
 
   return (
     <>
@@ -450,7 +568,6 @@ function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Progr
         <span className="apply-hero__sub">{p.sub}</span>
         <div className="apply-hero__badges">
           <span className="apply-badge apply-badge--gold">{p.cap}</span>
-          <span className="apply-badge">{closed ? '신청 마감' : 'QR 온라인 사전접수'}</span>
         </div>
       </section>
 
@@ -465,8 +582,8 @@ function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Progr
           <Tables p={p} />
         </aside>
 
-        {closed ? (
-          <ApplyClosed />
+        {closed || allFull ? (
+          <ApplyClosed full={!closed && allFull} />
         ) : (
           <form
             className="apply-form"
@@ -484,8 +601,12 @@ function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Progr
               setSubmitError(null)
               try {
                 await submitApplication(programKey, values, files)
-                onDone()
+                const videoByEmail = [...p.req, ...(p.opt ?? []), ...(p.attach ?? [])].some(
+                  ([key, , type]) => type === 'video' && values[`${key}Email`] === true && !values[key],
+                )
+                onDone({ videoByEmail })
               } catch (err) {
+                if (err instanceof CapacityError) loadSeats()
                 setSubmitError(err instanceof Error ? err.message : '신청을 접수하지 못했어요. 잠시 후 다시 시도해 주세요.')
               } finally {
                 submittingRef.current = false
@@ -501,7 +622,17 @@ function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Progr
                 </div>
                 <div className="apply-section__fields">
                   {sec.fields.map((def) => (
-                    <Field key={def[0]} def={def} required={sec.required} values={values} set={set} setFile={setFile} />
+                    <Field
+                      key={def[0]}
+                      def={def}
+                      required={sec.required}
+                      values={values}
+                      set={set}
+                      setFile={setFile}
+                      seats={capacity && def[0] === capacity.groupField ? (seats ?? undefined) : undefined}
+                      maxOption={capacity && def[0] === capacity.countField ? maxPeople : undefined}
+                      hint={p.hints?.[def[0]]}
+                    />
                   ))}
                 </div>
               </div>
@@ -511,37 +642,19 @@ function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Progr
               <div className="apply-section__head">
                 <span className="apply-section__title">동의</span>
               </div>
-              <button
-                type="button"
-                role="checkbox"
-                aria-checked={agreed}
-                className={`apply-agree__item${agreed ? ' is-checked' : ''}`}
-                onClick={() => set('agreePriv', !agreed)}
-              >
-                <Checkbox checked={agreed} />
-                <div>
-                  <strong>개인정보 수집·이용 동의 <span className="apply-star">(필수)</span></strong>
-                  <span>
-                    <span className="desktop-only">수집 목적: 접수·연락·안전관리·운영 · 행사 종료 후 파기</span>
-                    <span className="mobile-only">목적: 접수·연락·안전관리·운영</span>
-                  </span>
-                </div>
-              </button>
-              <button
-                type="button"
-                role="checkbox"
-                aria-checked={!!values.agreePhoto}
-                className={`apply-agree__item${values.agreePhoto ? ' is-checked' : ''}`}
-                onClick={() => set('agreePhoto', !values.agreePhoto)}
-              >
-                <Checkbox checked={!!values.agreePhoto} />
-                <div>
-                  <strong>사진·영상 촬영 및 홍보 활용 동의 <span className="apply-optional">(선택)</span></strong>
-                  <span>
-                    <span className="desktop-only">행사 기록 및 홍보물·SNS 게시에 활용 · </span>동의하지 않아도 참가할 수 있어요
-                  </span>
-                </div>
-              </button>
+              <ConsentItem
+                checked={agreed}
+                onToggle={() => set('agreePriv', !agreed)}
+                title="개인정보 수집·이용 동의"
+                terms={PRIVACY_TERMS}
+              />
+              <ConsentItem
+                checked={photoAgreed}
+                onToggle={() => set('agreePhoto', !photoAgreed)}
+                title="사진·영상 촬영 및 홍보 활용 동의"
+                terms={PHOTO_TERMS}
+                startAt={PRIVACY_TERMS.length + 1}
+              />
             </div>
 
             <div className="apply-submit">
@@ -557,7 +670,7 @@ function ApplyForm({ programKey, p, onDone }: { programKey: ProgramKey; p: Progr
               <span className="apply-submit__hint">
                 {canSubmit
                   ? '신청 완료 후 입력하신 연락처로 접수 확인 문자가 발송됩니다.'
-                  : '필수 항목(*)을 모두 입력하고 개인정보 수집·이용에 동의하면 신청할 수 있어요.'}
+                  : '필수 항목(*)을 모두 입력하고 두 가지 동의에 모두 체크하면 신청할 수 있어요.'}
               </span>
             </div>
           </form>
@@ -651,7 +764,7 @@ function SaveImageDialog({
   )
 }
 
-function ApplyDone({ p }: { p: Program }) {
+function ApplyDone({ p, videoByEmail = false }: { p: Program; videoByEmail?: boolean }) {
   const captureRef = useRef<HTMLDivElement>(null)
   // Offer to save right after completing the application
   const [dialogOpen, setDialogOpen] = useState(true)
@@ -661,7 +774,7 @@ function ApplyDone({ p }: { p: Program }) {
   const summary = [
     ['프로그램', p.name],
     ['일시', p.when],
-    ['장소', '용연 구름다리 일대'],
+    ['장소', p.where ?? '메인 무대'],
   ]
 
   const save = async () => {
@@ -692,6 +805,17 @@ function ApplyDone({ p }: { p: Program }) {
 
         {/* Everything in here is what gets saved as the image */}
         <div ref={captureRef} className="apply-done__capture">
+          {videoByEmail && (
+            <div className="apply-done__video">
+              <strong>영상 파일을 이메일로 보내주세요</strong>
+              <p>
+                링크 대신 이메일 제출을 선택하셨어요. 영상 파일을 이메일(
+                <a href={`mailto:${VIDEO_EMAIL}`}>{VIDEO_EMAIL}</a>)로 보내주세요.
+                <br />
+                메일 제목에 팀명(이름)과 연락처를 적어 주세요.
+              </p>
+            </div>
+          )}
           <div className="apply-done__summary">
             {summary.map(([k, v]) => (
               <div key={k}>
@@ -744,6 +868,7 @@ function ApplyDone({ p }: { p: Program }) {
 export default function ApplicationPage({ programKey }: { programKey: ProgramKey }) {
   const p: Program = PROGRAMS[programKey]
   const [done, setDone] = useState(false)
+  const [videoByEmail, setVideoByEmail] = useState(false)
 
   useEffect(() => {
     document.title = `${p.name} 참가신청 | 2026 용담용연 음악회 문화제`
@@ -760,12 +885,13 @@ export default function ApplicationPage({ programKey }: { programKey: ProgramKey
         )}
       </header>
       {done ? (
-        <ApplyDone p={p} />
+        <ApplyDone p={p} videoByEmail={videoByEmail} />
       ) : (
         <ApplyForm
           programKey={programKey}
           p={p}
-          onDone={() => {
+          onDone={(result) => {
+            setVideoByEmail(result.videoByEmail)
             setDone(true)
             window.scrollTo({ top: 0, behavior: 'instant' })
           }}

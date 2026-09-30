@@ -10,9 +10,11 @@ export const MAP = {
   image: `${IMAGE_DIR}/map.png`,
   width: 2000,
   height: 1000,
-  // 용연 구름다리, as a % of the image
-  marker: { x: '44.75%', y: '50.4%' },
-  kakaoUrl: 'https://map.kakao.com/link/search/용연구름다리',
+  // Event area (the park south of 용연구름다리 plus 용두암길 beside it), as polygon points in image pixels (2000 x 1000)
+  area: '776,582 797,582 820,598 846,618 866,645 880,672 889,703 894,736 896,768 896,790 873,790 820,796 767,802 740,798 727,788 723,760 721,730 716,704 722,684 730,664 743,633 752,614 760,600 768,588',
+  // Pin inside the event area, as a % of the image
+  marker: { x: '39.8%', y: '70.5%' },
+  kakaoUrl: 'https://kko.to/L4OXCh7Mn1',
 }
 
 export const navItems = [
@@ -40,16 +42,17 @@ export type Program = {
 }
 
 export const programs: Program[] = [
-  { no: '01', apply: 'walk', title: '용의 산책', description: '“용띠들 모여라” 퍼레이드', capacity: '선착순 60명' },
-  { no: '02', apply: 'culture', title: '문화의 물결' },
-  { no: '03', apply: 'song', title: '용연가요제' },
-  { no: '04', apply: 'runner', title: '드래곤러너', note: '선착순 100명 (인원 확정 필요)' },
-  { no: '05', apply: 'stamp', title: '찾아라 드래곤볼', description: '스탬프투어' },
+  { no: '01', apply: 'walk', title: '용의 산책', description: '“용띠들 모여라” 퍼레이드', capacity: '선착순 70명' },
+  { no: '02', apply: 'culture', title: '예술의 물결', capacity: '8팀 선정' },
+  { no: '03', apply: 'busking', title: '찾아가는 버스킹', capacity: '6팀 선정' },
+  { no: '04', apply: 'song', title: '용연가요제', capacity: '8팀 선정' },
+  { no: '05', apply: 'runner', title: '드래곤러너', description: '야간 러닝 · 누구나 참가' },
+  { no: '06', apply: 'stamp', title: '찾아라 드래곤볼', description: '스탬프투어' },
 ]
 
 export type Wave = {
   label: string
-  theme: string
+  theme?: string
   color: string
   items: { title: string; time: string; detail: string }[]
 }
@@ -60,8 +63,8 @@ export const waves: Wave[] = [
     theme: '역사와 전통',
     color: '#6b9bff',
     items: [
-      { title: '용의 산책', time: '10:00 ~ 11:00', detail: '용담 1·2동 용 퍼레이드' },
-      { title: '용연 기우제', time: '11:00 ~ 12:00', detail: '기우제 재현' },
+      { title: '용의 산책', time: '10:00 ~ 11:00', detail: '용 퍼레이드' },
+      { title: '용연 기우제', time: '11:00 ~ 12:00', detail: '용연기우제' },
     ],
   },
   {
@@ -69,7 +72,7 @@ export const waves: Wave[] = [
     theme: '참여와 문화',
     color: '#5fc9ba',
     items: [
-      { title: '예술의 물결', time: '12:00 ~ 15:00', detail: '용담 1·2동 동아리 및 자생단체 및 도민 열린 문화제' },
+      { title: '예술의 물결', time: '12:00 ~ 15:00', detail: '용담1·2동 동아리 및 청소년팀' },
       { title: '화합의 물결', time: '15:00 ~ 16:00', detail: '용연 ‘청룡vs황룡’ 줄다리기' },
       { title: '환호의 물결', time: '16:00 ~ 17:00', detail: '용연 가요제' },
     ],
@@ -80,10 +83,16 @@ export const waves: Wave[] = [
     color: '#a58bff',
     items: [
       { title: '축하 공연', time: '17:00 ~ 18:00', detail: '초청 아티스트 축하 공연' },
-      { title: '개막식', time: '18:00 ~ 18:30', detail: '내빈 소개 및 인사 말씀 및 개막 퍼포먼스' },
-      { title: '용연 음악회', time: '18:30 ~ 21:00', detail: '초청 아티스트 축하 공연' },
+      { title: '개막식', time: '18:00 ~ 18:30', detail: '인사말씀, 개막 퍼포먼스' },
+      { title: '용연 음악회', time: '18:30 ~ 21:00', detail: '어린이합창단, 고강민, 우연이, 먼데이키즈, 장민호' },
     ],
   },
+]
+
+/** Side programs, shown as their own table below the main schedule */
+export const sidePrograms: Wave['items'] = [
+  { title: '찾아라 드래곤볼', time: '11:00 ~ 17:30', detail: '스탬프 투어' },
+  { title: '드래곤 러너', time: '18:30 ~ 20:30', detail: '야간 러닝' },
 ]
 
 export const experiences = [
