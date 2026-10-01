@@ -26,7 +26,7 @@ export const navItems = [
 ]
 
 // Square, top-cropped photos pre-sized for 1x/2x/3x screens: artist-<slug>-{124,248,372}.jpg
-// (made from artist-<slug>.png; regenerate them when the original is replaced)
+// (face-aligned square crops of the official photos; to replace a photo, crop a new set of all three sizes)
 const artistPhoto = (slug: string) => ({
   image: `${IMAGE_DIR}/artist-${slug}-248.jpg`,
   srcSet: [124, 248, 372].map((w) => `${IMAGE_DIR}/artist-${slug}-${w}.jpg ${w}w`).join(', '),
@@ -34,7 +34,7 @@ const artistPhoto = (slug: string) => ({
 
 export const artists = [
   { name: '우연이', ...artistPhoto('wooyeon') },
-  { name: '먼데이키즈', ...artistPhoto('mondaykiz') },
+  { name: '먼데이 키즈', ...artistPhoto('mondaykiz') },
   { name: '장민호', ...artistPhoto('jangminho') },
 ]
 
@@ -97,7 +97,7 @@ export const waves: Wave[] = [
     items: [
       { title: '축하 공연', time: '17:00 ~ 18:00', detail: '축하 공연' },
       { title: '개막식', time: '18:00 ~ 18:30', detail: '개막 퍼포먼스' },
-      { title: '용연 음악회', time: '18:30 ~ 21:00', detail: '어린이합창단, 고강민, 우연이, 먼데이키즈, 장민호' },
+      { title: '용연 음악회', time: '18:30 ~ 21:00', detail: '어린이합창단, 고강민, 우연이, 먼데이 키즈, 장민호' },
     ],
   },
 ]

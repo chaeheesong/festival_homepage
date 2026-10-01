@@ -107,9 +107,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Fixed height on desktop; the photo covers it and is cropped as needed.
-     (min-height only so the content can never be clipped) */
-  min-height: 680px;
+  /* Grows with the screen at the photo's 2.4:1 ratio up to the photo's own height, but never
+     taller than the window below the 77px header, so the whole hero fits on screen.
+     Never below 680px. (--photo-width / --photo-ratio come from the loaded image in App.tsx) */
+  min-height: max(
+    680px,
+    min(min(100vw, var(--photo-width, 1942px)) / var(--photo-ratio, 2.4), 100svh - 77px)
+  );
   background: var(--navy-900);
   overflow: clip;
 }
@@ -142,12 +146,13 @@
   flex-direction: column;
   align-items: center;
   gap: 18px;
-  padding: 96px var(--gutter) 64px;
+  padding: 72px var(--gutter) 64px;
   text-align: center;
+  /* Soft dark haze behind the text, at 50% opacity */
   background: radial-gradient(
     ellipse 50% 50% at 50% 50%,
-    rgb(1, 15, 62) 0%,
-    rgba(1, 8, 31, 0.5) 50%,
+    rgba(1, 15, 62, 0.5) 0%,
+    rgba(1, 8, 31, 0.25) 50%,
     rgba(0, 0, 0, 0) 100%
   );
 }
@@ -165,7 +170,7 @@
 }
 
 .hero__place {
-  text-shadow: 0 2px 20px #000;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .hero__divider {
@@ -181,7 +186,8 @@
   line-height: 1.1;
   letter-spacing: -0.03em;
   color: var(--paper);
-  text-shadow: 0 0 14px rgba(11, 16, 48, 0.55), 0 3px 50px #000;
+  /* Tight shadow only: keeps the title readable without a hazy dark cloud behind it */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .hero__slogan {
@@ -199,7 +205,7 @@
   margin-top: 22px; /* 40px total with the parent gap */
   /* Nudged lower without changing the hero height (position, not transform, so photos stay crisp) */
   position: relative;
-  top: 44px;
+  top: 56px;
 }
 
 .hero__lineup-label {
@@ -233,9 +239,8 @@
 }
 
 .hero__artists img {
-  width: 124px;
-  height: 124px;
-  border-radius: 12px;
+  width: 160px;
+  height: 160px;
   object-fit: cover;
   object-position: top;
 }
@@ -961,12 +966,12 @@
     gap: 12px;
     width: 100%;
     padding: 64px 20px 36px;
-    /* closest-side: fully transparent before it reaches the box edges, so no visible cut */
+    /* Same haze at 50% opacity; closest-side keeps it fully transparent at the edges */
     background: radial-gradient(
       ellipse closest-side at 50% 45%,
-      rgba(1, 15, 62, 0.95) 0%,
-      rgba(1, 15, 62, 0.75) 35%,
-      rgba(1, 15, 62, 0.35) 65%,
+      rgba(1, 15, 62, 0.475) 0%,
+      rgba(1, 15, 62, 0.375) 35%,
+      rgba(1, 15, 62, 0.175) 65%,
       rgba(1, 15, 62, 0) 100%
     );
   }
@@ -976,7 +981,7 @@
     gap: 2px;
     font-size: 15px;
     letter-spacing: 0;
-    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.72);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   }
 
   .hero__place {
@@ -993,7 +998,7 @@
     line-height: 48.3px;
     letter-spacing: -1.26px;
     white-space: nowrap;
-    text-shadow: 0 0 12px rgba(11, 16, 48, 0.55), 0 3px 24px rgba(0, 0, 0, 0.72);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
   }
 
   .hero__slogan {
@@ -1024,7 +1029,6 @@
   .hero__artists img {
     width: 96px;
     height: 96px;
-    border-radius: 10px;
   }
 
   /* Shared headings */

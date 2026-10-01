@@ -87,10 +87,10 @@ function Hero() {
                 <img
                   src={artist.image}
                   srcSet={artist.srcSet}
-                  sizes="(max-width: 768px) 96px, 124px"
+                  sizes="(max-width: 768px) 96px, 160px"
                   alt={artist.name}
-                  width={124}
-                  height={124}
+                  width={160}
+                  height={160}
                 />
                 <span>{artist.name}</span>
               </li>
