@@ -255,7 +255,13 @@ function Location() {
       >
         <div
           className="location__map-canvas"
-          style={{ '--map-ratio': MAP.width / MAP.height } as CSSProperties}
+          style={
+            {
+              '--map-ratio': MAP.width / MAP.height,
+              '--focus-x': MAP.marker.x,
+              '--focus-y': MAP.marker.y,
+            } as CSSProperties
+          }
         >
           <img src={MAP.image} alt="메인 무대 약도" />
           <svg

@@ -689,7 +689,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: max(100%, var(--map-height) * var(--map-ratio));
+  width: calc(max(100%, var(--map-height) * var(--map-ratio)) * var(--map-zoom, 1));
   aspect-ratio: var(--map-ratio);
   transform: translate(-50%, -50%);
 }
@@ -709,13 +709,14 @@
 }
 
 .location__area polygon {
+  vector-effect: non-scaling-stroke;
   /* Same blue as the pin; a white halo keeps the edge crisp on the green park */
   fill: rgba(47, 88, 201, 0.28);
   stroke: #2f58c9;
-  stroke-width: 5;
+  stroke-width: 2;
   stroke-linejoin: round;
   paint-order: stroke;
-  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95));
+  filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.9));
 }
 
 .location__marker {
@@ -1314,7 +1315,13 @@
 
   .location__map {
     --map-height: 220px;
+    /* Zoom in on phones and centre the event area (the pin) in the box */
+    --map-zoom: 1.6;
     border-radius: 14px;
+  }
+
+  .location__map-canvas {
+    transform: translate(calc(-1 * var(--focus-x)), calc(-1 * var(--focus-y) + 18px));
   }
 
   .location__marker-label {
