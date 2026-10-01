@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { APPLY_PERIOD_LABEL, isApplyClosed } from './applications'
+import { APPLY_PERIOD_LABEL, CONTACT_TEL, isApplyClosed } from './applications'
 import { IMAGE_DIR, MAP, MOBILE_QUERY, artists, contacts, experiences, navItems, programs, sidePrograms, waves } from './data'
 import './App.css'
 
@@ -124,6 +124,9 @@ function Recruit() {
           </li>
         ))}
       </ul>
+      <p className="recruit__contact">
+        참가 신청 문의 <a href={`tel:${CONTACT_TEL.replace(/\D/g, '')}`}>{CONTACT_TEL}</a>
+      </p>
     </section>
   )
 }

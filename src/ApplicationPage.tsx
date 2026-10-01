@@ -612,7 +612,16 @@ function ApplyForm({
               setSubmitting(true)
               setSubmitError(null)
               try {
-                await submitApplication(programKey, values, files)
+                // Only send answers for fields still on screen, so a guardian section (or extra
+                // companions) that disappeared after an answer changed is not saved
+                const visible = new Set(sections.flatMap((sec) => sec.fields.map(([key]) => key)))
+                const submitted = Object.fromEntries(
+                  Object.entries(values).filter(
+                    ([key]) => key.startsWith('agree') || visible.has(key.replace(/(Etc|Email)$/, '')),
+                  ),
+                )
+                const submittedFiles = Object.fromEntries(Object.entries(files).filter(([key]) => visible.has(key)))
+                await submitApplication(programKey, submitted, submittedFiles)
                 const videoByEmail = [...p.req, ...(p.opt ?? []), ...(p.attach ?? [])].some(
                   ([key, , type]) => type === 'video' && values[`${key}Email`] === true && !values[key],
                 )
@@ -658,7 +667,7 @@ function ApplyForm({
                 checked={agreed}
                 onToggle={() => set('agreePriv', !agreed)}
                 title="개인정보 수집·이용 동의"
-                terms={PRIVACY_TERMS}
+                terms={PRIVACY_TERMS.map(([k, v, sub]) => [k, k === '제공하는 개인정보 항목' ? p.privacyItems : v, sub])}
               />
               <ConsentItem
                 checked={photoAgreed}

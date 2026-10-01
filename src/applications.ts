@@ -54,6 +54,8 @@ export type Program = {
   capacity?: { rpc: string; groupField?: string; countField: string }
   /** Message shown instead of the form once every seat is taken */
   fullNote?: string
+  /** Personal data collected by this form, listed in the privacy consent (item 3) */
+  privacyItems: string
   /** Light-colored notes shown next to field labels, by field key */
   hints?: Record<string, string>
   /** Place shown in the done-screen summary (default: 메인 무대) */
@@ -76,7 +78,7 @@ export type ConsentTerm = [label: string, text: string, sub?: string]
 export const PRIVACY_TERMS: ConsentTerm[] = [
   ['제공받는 자', '지방자치단체 등 관련 단체'],
   ['제공받는 자의 이용목적', '신청접수, 운영 및 안전관리 목적'],
-  ['제공하는 개인정보 항목', '성명, 거주지, 연락처'],
+  ['제공하는 개인정보 항목', ''], // filled per program from Program.privacyItems
   ['제공받는 자의 개인정보 보유 및 이용기간', '1년'],
   [
     '동의 거부 권리 사실 및 불이익 내용',
@@ -111,6 +113,7 @@ export const GUARDIAN_FIELDS: FieldDef[] = [
 export const PROGRAMS = {
   walk: {
     name: '용의 산책',
+    privacyItems: '성명, 연락처, 출생연도, 거주지역, 참가인원, 비상연락처, 희망 행렬 노선, 보호자 성명·연락처(미성년자에 한함)',
     sub: '용띠들 모여라 · 퍼레이드 참가자 모집',
     cap: '선착순 60명',
     early: true,
@@ -140,6 +143,7 @@ export const PROGRAMS = {
   },
   stamp: {
     name: '찾아라 드래곤볼',
+    privacyItems: '성명, 연락처, 참가인원, 거주지역, 동반 참가자 이름',
     sub: '용의 길 스탬프 투어 참가자 모집',
     cap: '선착순 150명',
     early: true,
@@ -175,6 +179,7 @@ export const PROGRAMS = {
   },
   runner: {
     name: '드래곤 러너',
+    privacyItems: '성명, 연락처, 연령대, 참가인원, 비상연락처, 거주지역, 보호자 성명·연락처(미성년자에 한함)',
     sub: '용담의 해안길을 달리는 특별한 러닝 참가자 모집 (자유러닝)',
     cap: '선착순 150명',
     early: true,
@@ -228,6 +233,7 @@ export const PROGRAMS = {
   },
   culture: {
     name: '예술의 물결',
+    privacyItems: '팀명, 대표자 성명, 연락처, 활동지역, 참가인원, 공연 정보(장르·내용·팀 소개), 공연 영상',
     sub: '용담1·2동 동아리 및 청소년 공연팀 공개 모집',
     cap: '8팀 선정',
     early: true,
@@ -269,6 +275,7 @@ export const PROGRAMS = {
   },
   busking: {
     name: '찾아가는 버스킹',
+    privacyItems: '팀명, 대표자 성명, 연락처, 활동지역, 참가인원, 공연 정보(장르·내용·팀 소개), 공연 영상',
     sub: '2026 용담용연 음악회·문화제의 시작을 함께할 버스킹 공연팀 공개 모집',
     cap: '총 6팀',
     info: [
@@ -310,6 +317,7 @@ export const PROGRAMS = {
   },
   song: {
     name: '용연가요제',
+    privacyItems: '팀명, 대표자 성명, 연락처, 참가인원, 연령대, 거주지역, 예선 영상, 참가자 소개·활동경력, 보호자 성명·연락처(미성년자에 한함)',
     sub: '용연가요제 참가자 공개 모집',
     cap: '본선 8팀',
     schedule: RECRUIT_SCHEDULE,
