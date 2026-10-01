@@ -197,8 +197,9 @@
   align-items: center;
   gap: 14px;
   margin-top: 22px; /* 40px total with the parent gap */
-  /* Nudged lower without changing the hero height */
-  transform: translateY(44px);
+  /* Nudged lower without changing the hero height (position, not transform, so photos stay crisp) */
+  position: relative;
+  top: 44px;
 }
 
 .hero__lineup-label {
@@ -1001,7 +1002,7 @@
   .hero__lineup {
     gap: 10px;
     margin-top: 16px; /* 28px total with the parent gap */
-    transform: translateY(30px);
+    top: 30px;
   }
 
   .hero__lineup-label {

@@ -25,10 +25,17 @@ export const navItems = [
   { label: '오시는 길', href: '#location' },
 ]
 
+// Square, top-cropped photos pre-sized for 1x/2x/3x screens: artist-<slug>-{124,248,372}.jpg
+// (made from artist-<slug>.png; regenerate them when the original is replaced)
+const artistPhoto = (slug: string) => ({
+  image: `${IMAGE_DIR}/artist-${slug}-248.jpg`,
+  srcSet: [124, 248, 372].map((w) => `${IMAGE_DIR}/artist-${slug}-${w}.jpg ${w}w`).join(', '),
+})
+
 export const artists = [
-  { name: '우연이', image: `${IMAGE_DIR}/artist-wooyeon.png` },
-  { name: '먼데이키즈', image: `${IMAGE_DIR}/artist-mondaykiz.png` },
-  { name: '장민호', image: `${IMAGE_DIR}/artist-jangminho.png` },
+  { name: '우연이', ...artistPhoto('wooyeon') },
+  { name: '먼데이키즈', ...artistPhoto('mondaykiz') },
+  { name: '장민호', ...artistPhoto('jangminho') },
 ]
 
 export type Program = {
