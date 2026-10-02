@@ -50,7 +50,7 @@ export type Program = {
 
 export const programs: Program[] = [
   { no: '01', apply: 'walk', title: '용의 산책', description: '“용띠들 모여라” 퍼레이드', capacity: '선착순 60명' },
-  { no: '02', apply: 'culture', title: '예술의 물결', capacity: '8팀 선정' },
+  { no: '02', apply: 'culture', title: '용담 1-2동 동아리 및 청소년 공연팀', capacity: '8팀 선정' },
   { no: '03', apply: 'busking', title: '찾아가는 버스킹', capacity: '6팀 선정' },
   { no: '04', apply: 'song', title: '환호의 물결', capacity: '8팀 선정' },
   { no: '05', apply: 'runner', title: '드래곤러너', capacity: '선착순 150명' },
