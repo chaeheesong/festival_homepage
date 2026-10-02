@@ -89,7 +89,7 @@ export const PHOTO_TERMS: ConsentTerm[] = [
   ['개인정보제공', '사진·영상촬영 및 홍보 활용 동의'],
 ]
 
-/** Shared recruitment timeline for the performance programs (예술의 물결, 찾아가는 버스킹, 용연가요제) */
+/** Shared recruitment timeline for the performance programs (예술의 물결, 찾아가는 버스킹, 환호의 물결) */
 const RECRUIT_SCHEDULE: [string, string][] = [
   ['참가팀 공개모집', '10월 1일 ~ 13일'],
   ['온라인 심사', '10월 16일'],
@@ -316,13 +316,13 @@ export const PROGRAMS = {
     doneNote: '10. 19. 온라인 심사 결과를 개별 연락드립니다.',
   },
   song: {
-    name: '용연가요제',
+    name: '환호의 물결',
     privacyItems: '팀명, 대표자 성명, 연락처, 참가인원, 연령대, 거주지역, 예선 영상, 참가자 소개·활동경력, 보호자 성명·연락처(미성년자에 한함)',
-    sub: '용연가요제 참가자 공개 모집',
+    sub: '환호의 물결 참가자 공개 모집',
     cap: '본선 8팀',
     schedule: RECRUIT_SCHEDULE,
     info: [
-      ['모집대상', '노래를 좋아하는 누구나'],
+      ['모집대상', '노래를 좋아하는 누구나 (제주시 거주자)'],
       ['본선', '2026. 10. 31.(토) 16:00~17:00'],
       ['장소', '메인무대'],
       ['참가형태', '개인 / 듀엣 / 팀'],
@@ -336,7 +336,7 @@ export const PROGRAMS = {
       ['온라인 영상 예선심사', '제출한 참가영상으로 심사 진행'],
       ['본선 8팀 선정', '선정자에게 개별 연락'],
       ['MR 및 무대자료 제출', '본선 참가곡 MR 및 필요한 자료 제출'],
-      ['용연가요제 본선 참가', '10월 31일(토) 메인무대'],
+      ['환호의 물결 본선 참가', '10월 31일(토) 메인무대'],
     ],
     tables: [
       {
