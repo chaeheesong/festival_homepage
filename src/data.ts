@@ -55,6 +55,8 @@ export const programs: Program[] = [
   { no: '04', apply: 'song', title: '용연가요제', capacity: '8팀 선정' },
   { no: '05', apply: 'runner', title: '드래곤러너', capacity: '선착순 150명' },
   { no: '06', apply: 'stamp', title: '찾아라 드래곤볼', capacity: '선착순 150명', note: '마감 후 현장 신청' },
+  { no: '07', apply: 'market', title: '플리마켓', capacity: '선착순 8팀', note: '모집기간 10. 8. ~ 10. 15.' },
+  { no: '08', apply: 'foodtruck', title: '푸드트럭', capacity: '선착순 4팀', note: '모집기간 10. 8. ~ 10. 15.' },
 ]
 
 export type Wave = {

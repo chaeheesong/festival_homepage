@@ -2,9 +2,10 @@
 
 /**
  * 'name': Korean/English letters only. 'tel': digits only, auto-hyphenated.
+ * 'docs': the program's `docs` rows as a table.
  * 'number': digits only; the extra is the unit shown after the box and stored with it (e.g. '분' → "8분").
  */
-export type FieldType = 'text' | 'name' | 'tel' | 'number' | 'choice' | 'select' | 'area' | 'file' | 'video' | 'check' | 'rules'
+export type FieldType = 'text' | 'name' | 'tel' | 'number' | 'choice' | 'select' | 'area' | 'file' | 'video' | 'check' | 'rules' | 'docs'
 
 /** Contact for applicants: video submissions by email and general inquiries */
 export const CONTACT_EMAIL = 'jms7564@hanmail.net'
@@ -50,12 +51,19 @@ export type Program = {
   /**
    * Headcount limit enforced by the database (see admin/3-walk-capacity.sql):
    * `rpc` returns seats left per option of `groupField`; `countField` is the party size
+   * (without one, each application takes one seat, e.g. one team)
    */
-  capacity?: { rpc: string; groupField?: string; countField: string }
+  capacity?: { rpc: string; groupField?: string; countField?: string }
   /** Message shown instead of the form once every seat is taken */
   fullNote?: string
   /** Personal data collected by this form, listed in the privacy consent (item 3) */
   privacyItems: string
+  /** Documents to send by email, shown as a table where the 'docs' field sits: [document, note, required?] */
+  docs?: [document: string, note: string, need: string][]
+  /** Fields shown only while the predicate holds, by field key (hidden answers are not submitted) */
+  showIf?: Record<string, (v: FormValues) => boolean>
+  /** Own recruitment period, when it differs from APPLY_DEADLINE / APPLY_PERIOD_LABEL */
+  period?: { deadline: Date; label: string }
   /** Light-colored notes shown next to field labels, by field key */
   hints?: Record<string, string>
   /** Place shown in the done-screen summary (default: 메인 무대) */
@@ -68,8 +76,12 @@ export type Program = {
 export const APPLY_DEADLINE = new Date('2026-10-14T00:00:00+09:00')
 export const APPLY_PERIOD_LABEL = '10월 1일 ~ 10월 13일'
 
-export function isApplyClosed(now = new Date()) {
-  return now.getTime() >= APPLY_DEADLINE.getTime()
+export function isApplyClosed(p?: Program, now = new Date()) {
+  return now.getTime() >= (p?.period?.deadline ?? APPLY_DEADLINE).getTime()
+}
+
+export function applyPeriodLabel(p?: Program) {
+  return p?.period?.label ?? APPLY_PERIOD_LABEL
 }
 
 /** Consent terms shown under each checkbox on every application form: [label, text, sub-line?] */
@@ -108,6 +120,35 @@ export const GUARDIAN_FIELDS: FieldDef[] = [
   ['gname', '보호자 성명', 'name', '보호자 성명'],
   ['gtel', '보호자 연락처', 'tel', '010-0000-0000'],
   ['gagree', '보호자로서 참가에 동의합니다', 'check'],
+]
+
+/** Recruitment period for the vendor programs (플리마켓, 푸드트럭): Oct 8 through the whole of Oct 15 */
+const VENDOR_PERIOD = { deadline: new Date('2026-10-16T00:00:00+09:00'), label: '10월 8일 ~ 10월 15일' }
+
+const VENDOR_INFO: [string, string][] = [
+  ['운영 일시', '2026. 10. 31.(토) 11:00~21:00'],
+  ['모집기간', '10. 8.(목) ~ 10. 15.(목)'],
+]
+
+/** 플리마켓 및 푸드트럭 참가 운영수칙 준수 서약서 */
+const VENDOR_PLEDGE: FieldDef[] = [
+  [
+    'pledgeRules',
+    '참가 운영수칙 준수 서약서',
+    'rules',
+    [
+      '행사 운영시간을 준수하며, 주최·주관 측이 지정한 장소에서만 영업하겠습니다.',
+      '신청서에 기재한 판매품목 및 메뉴를 임의로 변경하지 않겠습니다.',
+      '판매가격을 소비자가 쉽게 확인할 수 있도록 표시하겠습니다.',
+      '행사장 내 안전·위생·청결을 유지하겠습니다.',
+      '무단 양도, 대리 운영 및 승인되지 않은 판매행위를 하지 않겠습니다.',
+      '화기·전기·가스 사용 시 안전수칙과 관계 법령을 준수하겠습니다.',
+      '발생한 쓰레기와 폐기물은 지정된 방법으로 처리하겠습니다.',
+      '주최·주관 측의 정당한 현장 운영 및 안전관리 지침에 협조하겠습니다.',
+      '허위서류 제출, 운영수칙 위반 등 참가자 귀책사유가 발생한 경우 행사 운영규정에 따른 조치를 수용하겠습니다.',
+    ],
+  ],
+  ['pledge', '위 내용을 충분히 숙지하였으며 이를 준수할 것을 서약합니다', 'check'],
 ]
 
 export const PROGRAMS = {
@@ -381,6 +422,89 @@ export const PROGRAMS = {
     minor: (v) => v.age === '10대 미만' || v.age === '10대',
     when: '본선 2026. 10. 31.(토) 16:00~17:00',
     doneNote: '예선 심사 결과는 개별 연락드립니다.',
+  },
+  market: {
+    name: '플리마켓',
+    privacyItems: '대표자 성명, 업체명(상호), 연락처, 주소, 참가자 구분, 사업자등록 여부, 판매품목, 전기 사용 여부·예상 사용 전력',
+    sub: '용담용연 음악회·문화제와 함께할 플리마켓 공개 모집',
+    cap: '선착순 8팀',
+    early: true,
+    period: VENDOR_PERIOD,
+    info: [
+      ...VENDOR_INFO,
+      ['모집인원', '선착순 8팀'],
+      ['참가대상', '개인 · 사업자 · 단체'],
+      ['판매품목', '수공예품, 액세서리, 생활용품, 의류, 농산품 등'],
+    ],
+    req: [
+      ['name', '대표자 성명', 'name', '홍길동'],
+      ['shop', '업체명(상호)', 'text', '업체명(상호)'],
+      ['tel', '연락처', 'tel', '010-0000-0000'],
+      ['addr', '주소', 'text', '주소'],
+      ['kind', '참가자 구분', 'choice', ['개인', '사업자', '단체']],
+      ['biz', '사업자등록 여부', 'choice', ['유', '무']],
+      ['category', '판매품목 유형', 'choice', ['수공예품', '액세서리', '생활용품', '의류', '농산품', '기타']],
+      ['items', '주요 판매 품목', 'area', '판매할 품목을 구체적으로 적어 주세요'],
+      ['power', '전기 사용', 'choice', ['유', '무']],
+      ['kw', '예상 사용 전력 (kW)', 'text', '예: 1.5kW'],
+      ['docs', '추가 제출자료 (이메일 제출)', 'docs'],
+      ...VENDOR_PLEDGE,
+    ],
+    docs: [
+      ['사업자등록증 사본', '', '사업자 해당 시'],
+      ['신고·허가·인증자료', '관련 품목의 판매에 필요한 경우', '해당 시'],
+    ],
+    showIf: { kw: (v) => v.power === '유' },
+    capacity: { rpc: 'market_remaining' },
+    fullNote: '선착순 8팀 모집이 마감되었습니다.\n많은 관심에 감사드립니다.',
+    when: '2026. 10. 31.(토) 11:00~21:00',
+    where: '행사장 (부스 위치는 참가 확정 후 안내)',
+    doneNote: `추가 제출자료(해당 시)는 이메일(${CONTACT_EMAIL})로 보내주세요. 서류 확인 후 참가 확정 여부를 개별 연락드립니다.`,
+  },
+  foodtruck: {
+    name: '푸드트럭',
+    privacyItems:
+      '대표자 성명, 사업자 대표자, 업체명(상호), 영업신고 상호, 사업자등록번호, 영업신고 등록번호, 연락처, 사업장 주소, 차량번호, 차량 크기, 영업신고 업종, 판매메뉴·가격, 전기·가스 사용 정보',
+    sub: '용담용연 음악회·문화제와 함께할 푸드트럭 공개 모집',
+    cap: '선착순 4팀',
+    early: true,
+    period: VENDOR_PERIOD,
+    info: [...VENDOR_INFO, ['모집인원', '선착순 4팀'], ['가스 사용', 'LPG 사용 불가']],
+    req: [
+      ['name', '대표자 성명', 'name', '홍길동'],
+      ['bizOwner', '사업자 대표자', 'name', '홍길동'],
+      ['shop', '업체명(상호)', 'text', '업체명(상호)'],
+      ['permitShop', '영업신고 상호', 'text', '영업신고증의 상호'],
+      ['bizNo', '사업자등록번호', 'text', '000-00-00000'],
+      ['permitNo', '영업신고 등록번호', 'text', '영업신고증의 등록번호'],
+      ['tel', '연락처(대표자)', 'tel', '010-0000-0000'],
+      ['addr', '사업장 주소', 'text', '사업장 주소'],
+      ['car', '차량번호 (푸드트럭 차량등록번호)', 'text', '예: 12가 3456'],
+      ['size', '차량 크기 (가로×세로×높이, m)', 'text', '예: 5.5 × 2.0 × 2.8'],
+      ['permitType', '영업신고 업종', 'text', '예: 휴게음식점'],
+      ['menu', '주요 판매메뉴 (메뉴명 및 판매가격)', 'area', '예: 닭꼬치 4,000원 (한 줄에 메뉴 하나씩)'],
+      ['power', '전기 사용', 'choice', ['자체발전기', '행사장 전기']],
+      ['kw', '전력 소요량 (소비전력, kW)', 'text', '예: 3kW'],
+      ['gas', '가스 사용', 'choice', ['유', '무']],
+      ['docs', '제출 서류 (이메일 제출)', 'docs'],
+      ...VENDOR_PLEDGE,
+    ],
+    docs: [
+      ['사업자등록증 사본', '', '필수'],
+      ['식품 영업신고증 사본', '', '필수'],
+      ['자동차등록증 사본', '', '필수'],
+      ['대표메뉴 사진', '', '필수'],
+      ['차량 외관 사진', '', '필수'],
+      ['건강진단결과서(보건증)', '조리·판매 종사자 대상', '필수'],
+      ['위생교육 수료증', '', '필수'],
+      ['생산물배상책임보험 가입증명서', '참가조건으로 권장', '권장'],
+    ],
+    hints: { gas: 'LPG 사용 불가' },
+    capacity: { rpc: 'foodtruck_remaining' },
+    fullNote: '선착순 4팀 모집이 마감되었습니다.\n많은 관심에 감사드립니다.',
+    when: '2026. 10. 31.(토) 11:00~21:00',
+    where: '행사장 (위치는 참가 확정 후 안내)',
+    doneNote: `제출 서류는 이메일(${CONTACT_EMAIL})로 보내주세요. 서류 확인 후 참가 확정 여부를 개별 연락드립니다.`,
   },
 } satisfies Record<string, Program>
 

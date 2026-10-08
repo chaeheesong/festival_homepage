@@ -21,7 +21,7 @@ npm run preview  # 빌드 결과 미리보기
 | `src/applications.ts` | 참가신청서 내용 (안내, 입력 항목, 필수/선택) |
 | `public/asset/image/` | 이미지 (첫 화면 배경, 출연진, 체험존, 약도) |
 
-- 참가신청 화면은 `?p=walk`, `?p=culture`, `?p=song`, `?p=runner`, `?p=stamp` 주소로 열립니다.
+- 참가신청 화면은 `?p=walk`, `?p=culture`, `?p=song`, `?p=runner`, `?p=stamp`, `?p=market`, `?p=foodtruck` 주소로 열립니다.
 - 신청 내용은 아직 서버에 저장되지 않습니다 (신청 완료 화면만 표시).
 
 ## 이미지 교체

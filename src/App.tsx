@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { APPLY_PERIOD_LABEL, CONTACT_TEL, isApplyClosed } from './applications'
+import { APPLY_PERIOD_LABEL, CONTACT_TEL, PROGRAMS, isApplyClosed } from './applications'
 import { IMAGE_DIR, MAP, MOBILE_QUERY, artists, contacts, experiences, navItems, programs, sidePrograms, waves } from './data'
 import './App.css'
 
@@ -103,7 +103,6 @@ function Hero() {
 }
 
 function Recruit() {
-  const closed = isApplyClosed()
   return (
     <section id="apply" className="recruit">
       <div className="recruit__head">
@@ -114,22 +113,25 @@ function Recruit() {
         </div>
       </div>
       <ul className="recruit__cards">
-        {programs.map((p) => (
-          <li key={p.no}>
-            <a className={`program-card${closed ? ' is-closed' : ''}`} href={`?p=${p.apply}`}>
-              <span className="program-card__no">{p.no}</span>
-              <h3 className="program-card__title">{p.title}</h3>
-              <div className="program-card__body">
-                {p.description && <p className="program-card__desc">{p.description}</p>}
-                {p.capacity && <p className="program-card__capacity">{p.capacity}</p>}
-                {p.note && <p className="program-card__note">{p.note}</p>}
-              </div>
-              <span className="program-card__button">
-                {closed ? '신청 마감' : <>신청<span className="desktop-only">하기</span> →</>}
-              </span>
-            </a>
-          </li>
-        ))}
+        {programs.map((p) => {
+          const closed = isApplyClosed(PROGRAMS[p.apply])
+          return (
+            <li key={p.no}>
+              <a className={`program-card${closed ? ' is-closed' : ''}`} href={`?p=${p.apply}`}>
+                <span className="program-card__no">{p.no}</span>
+                <h3 className="program-card__title">{p.title}</h3>
+                <div className="program-card__body">
+                  {p.description && <p className="program-card__desc">{p.description}</p>}
+                  {p.capacity && <p className="program-card__capacity">{p.capacity}</p>}
+                  {p.note && <p className="program-card__note">{p.note}</p>}
+                </div>
+                <span className="program-card__button">
+                  {closed ? '신청 마감' : <>신청<span className="desktop-only">하기</span> →</>}
+                </span>
+              </a>
+            </li>
+          )
+        })}
       </ul>
       <p className="recruit__contact">
         참가 신청 문의 <a href={`tel:${CONTACT_TEL.replace(/\D/g, '')}`}>{CONTACT_TEL}</a>

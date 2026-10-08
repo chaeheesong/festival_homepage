@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { toBlob } from 'html-to-image'
 import {
-  APPLY_PERIOD_LABEL,
   CONTACT_EMAIL,
   CONTACT_TEL,
   GUARDIAN_FIELDS,
@@ -9,6 +8,7 @@ import {
   PRIVACY_TERMS,
   PROGRAMS,
   VIDEO_EMAIL,
+  applyPeriodLabel,
   isApplyClosed,
 } from './applications'
 import { CapacityError, fetchRemaining, submitApplication } from './submitApplication'
@@ -21,8 +21,9 @@ const PROGRAM_LIST_URL = './#apply'
 type Section = { title: string; note?: string; fields: FieldDef[]; required: boolean }
 
 function buildSections(p: Program, v: FormValues): Section[] {
-  const sections: Section[] = [{ title: '필수 정보', note: '* 표시는 필수 입력', fields: p.req, required: true }]
-  if (p.opt) sections.push({ title: '선택 정보', fields: p.opt, required: false })
+  const shown = (fields: FieldDef[]) => fields.filter(([key]) => p.showIf?.[key]?.(v) ?? true)
+  const sections: Section[] = [{ title: '필수 정보', note: '* 표시는 필수 입력', fields: shown(p.req), required: true }]
+  if (p.opt) sections.push({ title: '선택 정보', fields: shown(p.opt), required: false })
   if (p.mates) {
     const n = parseInt(String(v.count ?? '1'), 10) - 1
     if (n > 0) {
@@ -81,6 +82,7 @@ function isAnswered([key, , type, extra]: FieldDef, v: FormValues): boolean {
   const filled = (x: unknown) => typeof x === 'string' && x.trim() !== ''
   switch (type) {
     case 'rules':
+    case 'docs':
       return true
     case 'check':
       return value === true
@@ -100,7 +102,7 @@ function isAnswered([key, , type, extra]: FieldDef, v: FormValues): boolean {
   }
 }
 
-const FULL_WIDTH_TYPES = ['choice', 'area', 'file', 'video', 'check', 'rules']
+const FULL_WIDTH_TYPES = ['choice', 'area', 'file', 'video', 'check', 'rules', 'docs']
 
 function Checkbox({ checked }: { checked: boolean }) {
   return <span className={`apply-checkbox${checked ? ' is-checked' : ''}`} aria-hidden>{checked ? '✓' : ''}</span>
@@ -118,11 +120,13 @@ type FieldProps = {
   maxOption?: number
   /** Light-colored note next to the label */
   hint?: string
+  /** Rows for a 'docs' field */
+  docs?: Program['docs']
 }
 
 const MAX_FILE_MB = 10
 
-function Field({ def: [key, label, type, extra], required, values, set, setFile, seats, maxOption, hint }: FieldProps) {
+function Field({ def: [key, label, type, extra], required, values, set, setFile, seats, maxOption, hint, docs }: FieldProps) {
   const fileInput = useRef<HTMLInputElement>(null)
   const [fileError, setFileError] = useState<string | null>(null)
   // Format errors show only after leaving the field, not mid-typing
@@ -138,7 +142,7 @@ function Field({ def: [key, label, type, extra], required, values, set, setFile,
     <div className={`apply-field${FULL_WIDTH_TYPES.includes(type) || hint ? ' apply-field--full' : ''}`}>
       {type !== 'check' && (
         <label className="apply-label" htmlFor={id}>
-          {label} {required && type !== 'rules' && <span className="apply-star">*</span>}
+          {label} {required && type !== 'rules' && type !== 'docs' && <span className="apply-star">*</span>}
           {hint && <span className="apply-label__hint">{hint}</span>}
         </label>
       )}
@@ -215,6 +219,17 @@ function Field({ def: [key, label, type, extra], required, values, set, setFile,
             <li key={rule}>{rule}</li>
           ))}
         </ul>
+      )}
+
+      {type === 'docs' && docs && (
+        <>
+          <DocsTable docs={docs} id={id} />
+          <p className="apply-video-note">
+            신청 후 이메일(<a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>)로 보내주세요.
+            <span>메일 제목에 업체명과 연락처를 적어 주세요.</span>
+            <span>신청 완료 후 제출 서류 목록을 이미지로 저장할 수 있어요.</span>
+          </p>
+        </>
       )}
 
       {type === 'select' && (
@@ -375,6 +390,46 @@ function Field({ def: [key, label, type, extra], required, values, set, setFile,
   )
 }
 
+function DocsTable({ docs, id }: { docs: NonNullable<Program['docs']>; id?: string }) {
+  return (
+    <table className="apply-docs" id={id}>
+      <thead>
+        <tr>
+          <th scope="col">서류</th>
+          <th scope="col">구분</th>
+        </tr>
+      </thead>
+      <tbody>
+        {docs.map(([doc, note, need]) => (
+          <tr key={doc}>
+            <td>
+              {doc}
+              {note && <small>{note}</small>}
+            </td>
+            <td className={need === '필수' ? 'is-required' : undefined}>{need}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
+/** The documents to email, in the done-screen guide (and so in the saved image) */
+function DoneDocs({ p }: { p: Program }) {
+  if (!p.docs) return null
+  const title = p.req.find(([, , type]) => type === 'docs')?.[1] ?? '제출 서류'
+  return (
+    <div className="apply-done__docs">
+      <span className="apply-box-title">{title}</span>
+      <DocsTable docs={p.docs} />
+      <p className="apply-video-note">
+        이메일(<a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>)로 보내주세요.
+        <span>메일 제목에 업체명과 연락처를 적어 주세요.</span>
+      </p>
+    </div>
+  )
+}
+
 function InfoRows({ p, compact }: { p: Program; compact?: boolean }) {
   return (
     <div className={compact ? 'apply-info apply-info--compact' : 'apply-info'}>
@@ -498,7 +553,8 @@ function ConsentItem({
   )
 }
 
-function ApplyClosed({ full = false, fullNote }: { full?: boolean; fullNote?: string }) {
+function ApplyClosed({ p, full = false }: { p: Program; full?: boolean }) {
+  const fullNote = p.fullNote
   return (
     <div className="apply-closed">
       <span className="apply-closed__icon" aria-hidden>!</span>
@@ -508,7 +564,7 @@ function ApplyClosed({ full = false, fullNote }: { full?: boolean; fullNote?: st
           <span className="apply-closed__note">{fullNote}</span>
         ) : (
           <>
-            {full ? '많은 관심에 감사드립니다.' : `신청 기간: ${APPLY_PERIOD_LABEL}`}
+            {full ? '많은 관심에 감사드립니다.' : `신청 기간: ${applyPeriodLabel(p)}`}
             <br />
             {full ? '다른 프로그램도 둘러봐 주세요. 행사 당일 현장에서 만나요!' : '참여해 주셔서 감사합니다. 행사 당일 현장에서 만나요!'}
           </>
@@ -529,7 +585,7 @@ function ApplyForm({
   /** videoByEmail: the applicant ticked "링크가 없어 이메일로 보내겠습니다" */
   onDone: (result: { videoByEmail: boolean }) => void
 }) {
-  const [closed, setClosed] = useState(() => isApplyClosed())
+  const [closed, setClosed] = useState(() => isApplyClosed(p))
   // Dropdowns show their first option, so start with that as the stored answer too
   const [values, setValues] = useState<FormValues>(() =>
     Object.fromEntries(
@@ -560,11 +616,13 @@ function ApplyForm({
   const maxPeople = seatsLeft ?? maxSeats
   const allFull = maxSeats === 0
   // Keep the answers within what is left: drop a group that filled up, shrink the party size
-  const people = capacity ? Number(values[capacity.countField] ?? 1) : 0
+  const people = capacity?.countField ? Number(values[capacity.countField] ?? 1) : 0
   useEffect(() => {
     if (!capacity || !seats) return
     if (capacity.groupField && typeof group === 'string' && (seats[group] ?? 0) <= 0) set(capacity.groupField, undefined)
-    if (maxPeople !== undefined && maxPeople > 0 && people > maxPeople) set(capacity.countField, String(maxPeople))
+    if (capacity.countField && maxPeople !== undefined && maxPeople > 0 && people > maxPeople) {
+      set(capacity.countField, String(maxPeople))
+    }
   }, [capacity, seats, group, maxPeople, people])
 
   const agreed = !!values.agreePriv
@@ -595,7 +653,7 @@ function ApplyForm({
         </aside>
 
         {closed || allFull ? (
-          <ApplyClosed full={!closed && allFull} fullNote={p.fullNote} />
+          <ApplyClosed p={p} full={!closed && allFull} />
         ) : (
           <form
             className="apply-form"
@@ -603,7 +661,7 @@ function ApplyForm({
               e.preventDefault()
               if (!canSubmit || submittingRef.current) return
               // The page may have been left open past the deadline
-              if (isApplyClosed()) {
+              if (isApplyClosed(p)) {
                 setClosed(true)
                 window.scrollTo({ top: 0, behavior: 'instant' })
                 return
@@ -653,6 +711,7 @@ function ApplyForm({
                       seats={capacity && def[0] === capacity.groupField ? (seats ?? undefined) : undefined}
                       maxOption={capacity && def[0] === capacity.countField ? maxPeople : undefined}
                       hint={p.hints?.[def[0]]}
+                      docs={def[2] === 'docs' ? p.docs : undefined}
                     />
                   ))}
                 </div>
@@ -865,6 +924,7 @@ function ApplyDone({ p, videoByEmail = false }: { p: Program; videoByEmail?: boo
             <Notice p={p} />
             <Steps p={p} compact />
             <Tables p={p} compact />
+            <DoneDocs p={p} />
             <span className="apply-done__contact">
               문의 · 이메일: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> · 전화번호:{' '}
               <a href={`tel:${CONTACT_TEL.replace(/\D/g, '')}`}>{CONTACT_TEL}</a>
