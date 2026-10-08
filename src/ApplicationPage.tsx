@@ -638,6 +638,9 @@ function ApplyForm({
         <span className="apply-hero__sub">{p.sub}</span>
         <div className="apply-hero__badges">
           <span className="apply-badge apply-badge--gold">{p.cap}</span>
+          {capacity?.badgeUnit && !closed && maxSeats !== undefined && (
+            <span className="apply-badge">{maxSeats > 0 ? `잔여 ${maxSeats}${capacity.badgeUnit}` : '마감'}</span>
+          )}
         </div>
       </section>
 

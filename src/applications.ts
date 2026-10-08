@@ -51,9 +51,10 @@ export type Program = {
   /**
    * Headcount limit enforced by the database (see admin/3-walk-capacity.sql):
    * `rpc` returns seats left per option of `groupField`; `countField` is the party size
-   * (without one, each application takes one seat, e.g. one team)
+   * (without one, each application takes one seat, e.g. one team);
+   * `badgeUnit` shows the seats left next to the hero badge, e.g. '팀' → "잔여 3팀"
    */
-  capacity?: { rpc: string; groupField?: string; countField?: string }
+  capacity?: { rpc: string; groupField?: string; countField?: string; badgeUnit?: string }
   /** Message shown instead of the form once every seat is taken */
   fullNote?: string
   /** Personal data collected by this form, listed in the privacy consent (item 3) */
@@ -451,7 +452,7 @@ export const PROGRAMS = {
       ['신고·허가·인증자료', '관련 품목의 판매에 필요한 경우', '해당 시'],
     ],
     showIf: { kw: (v) => v.power === '유' },
-    capacity: { rpc: 'market_remaining' },
+    capacity: { rpc: 'market_remaining', badgeUnit: '팀' },
     fullNote: '선착순 8팀 모집이 마감되었습니다.\n많은 관심에 감사드립니다.',
     when: '2026. 10. 31.(토) 11:00~21:00',
     where: '행사장 (부스 위치는 참가 확정 후 안내)',
@@ -494,7 +495,7 @@ export const PROGRAMS = {
       ['생산물배상책임보험 가입증명서', '', '권장'],
     ],
     hints: { gas: 'LPG 사용 불가' },
-    capacity: { rpc: 'foodtruck_remaining' },
+    capacity: { rpc: 'foodtruck_remaining', badgeUnit: '팀' },
     fullNote: '선착순 4팀 모집이 마감되었습니다.\n많은 관심에 감사드립니다.',
     when: '2026. 10. 31.(토) 11:00~21:00',
     where: '행사장 (위치는 참가 확정 후 안내)',
