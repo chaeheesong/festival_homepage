@@ -362,6 +362,10 @@
   color: var(--blue);
 }
 
+.program-card__capacity.is-full {
+  color: #8a90a8;
+}
+
 .program-card__note {
   font-weight: 700;
   line-height: 17.55px;

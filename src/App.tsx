@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { APPLY_PERIOD_LABEL, CONTACT_TEL, PROGRAMS, isApplyClosed } from './applications'
+import type { Program as ApplyProgram, ProgramKey } from './applications'
+import { fetchRemaining } from './submitApplication'
 import { IMAGE_DIR, MAP, MOBILE_QUERY, artists, contacts, experiences, navItems, programs, sidePrograms, waves } from './data'
 import './App.css'
 
@@ -102,7 +104,25 @@ function Hero() {
   )
 }
 
+/** Seats left per first-come program (all groups added up), loaded from the database */
+function useRemaining() {
+  const [remaining, setRemaining] = useState<Partial<Record<ProgramKey, number>>>({})
+  useEffect(() => {
+    for (const key of Object.keys(PROGRAMS) as ProgramKey[]) {
+      const p: ApplyProgram = PROGRAMS[key]
+      if (!p.capacity || isApplyClosed(p)) continue
+      fetchRemaining(p.capacity.rpc).then((seats) => {
+        if (!seats) return
+        const left = Object.values(seats).reduce((sum, n) => sum + n, 0)
+        setRemaining((r) => ({ ...r, [key]: left }))
+      })
+    }
+  }, [])
+  return remaining
+}
+
 function Recruit() {
+  const remaining = useRemaining()
   return (
     <section id="apply" className="recruit">
       <div className="recruit__head">
@@ -114,7 +134,9 @@ function Recruit() {
       </div>
       <ul className="recruit__cards">
         {programs.map((p) => {
-          const closed = isApplyClosed(PROGRAMS[p.apply])
+          const apply: ApplyProgram = PROGRAMS[p.apply]
+          const full = remaining[p.apply] === 0
+          const closed = isApplyClosed(apply) || full
           return (
             <li key={p.no}>
               <a className={`program-card${closed ? ' is-closed' : ''}`} href={`?p=${p.apply}`}>
@@ -122,7 +144,11 @@ function Recruit() {
                 <h3 className="program-card__title">{p.title}</h3>
                 <div className="program-card__body">
                   {p.description && <p className="program-card__desc">{p.description}</p>}
-                  {p.capacity && <p className="program-card__capacity">{p.capacity}</p>}
+                  {full ? (
+                    <p className="program-card__capacity is-full">신청 마감</p>
+                  ) : (
+                    p.capacity && <p className="program-card__capacity">{p.capacity}</p>
+                  )}
                   {p.note && <p className="program-card__note">{p.note}</p>}
                 </div>
                 <span className="program-card__button">
