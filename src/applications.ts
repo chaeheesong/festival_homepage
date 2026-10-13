@@ -122,6 +122,9 @@ export const GUARDIAN_FIELDS: FieldDef[] = [
   ['gagree', '보호자로서 참가에 동의합니다', 'check'],
 ]
 
+/** First-come programs (용의 산책, 드래곤 러너, 찾아라 드래곤볼) stay open past APPLY_DEADLINE until every seat is taken, at the latest through the whole of Oct 31 */
+const FIRST_COME_PERIOD = { deadline: new Date('2026-11-01T00:00:00+09:00'), label: '10월 1일 ~ 선착순 마감까지' }
+
 /** Recruitment period for the vendor programs (플리마켓, 푸드트럭): Oct 8 through the whole of Oct 15 */
 const VENDOR_PERIOD = { deadline: new Date('2026-10-16T00:00:00+09:00'), label: '10월 8일 ~ 10월 15일' }
 
@@ -158,6 +161,7 @@ export const PROGRAMS = {
     sub: '용띠들 모여라 · 퍼레이드 참가자 모집',
     cap: '선착순 60명',
     early: true,
+    period: FIRST_COME_PERIOD,
     info: [
       ['일시', '2026. 10. 31.(토) 오전 10:00 ~ 11:00', '※ 오전 9시 50분까지 해당 동사무소에 도착해 인원 체크를 합니다.'],
       ['장소', '용담1동 동사무소 또는 용담2동 동사무소'],
@@ -185,6 +189,7 @@ export const PROGRAMS = {
     sub: '용의 길 스탬프 투어 참가자 모집',
     cap: '선착순 150명',
     early: true,
+    period: FIRST_COME_PERIOD,
     info: [
       ['운영시간', '2026. 10. 31.(토) 11:00~17:30'],
       ['마감', '마지막 출발 15:00 / 완주 확인 17:30'],
@@ -221,6 +226,7 @@ export const PROGRAMS = {
     sub: '용담의 해안길을 달리는 특별한 러닝 참가자 모집 (자유러닝)',
     cap: '선착순 150명',
     early: true,
+    period: FIRST_COME_PERIOD,
     info: [
       ['일시', '2026. 10. 31.(토) 18:30~20:30\n마지막 출발 19:30\n도착 완주 확인 20:30까지'],
       ['집결', '드래곤러너 안내부스'],

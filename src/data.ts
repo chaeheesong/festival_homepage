@@ -49,12 +49,12 @@ export type Program = {
 }
 
 export const programs: Program[] = [
-  { no: '01', apply: 'walk', title: '용의 산책', description: '“용띠들 모여라” 퍼레이드', capacity: '선착순 60명' },
+  { no: '01', apply: 'walk', title: '용의 산책', description: '“용띠들 모여라” 퍼레이드', capacity: '선착순 60명', note: '선착순 마감까지' },
   { no: '02', apply: 'culture', title: '용담 1-2동 동아리 및 청소년 공연팀', capacity: '8팀 선정' },
   { no: '03', apply: 'busking', title: '찾아가는 버스킹', capacity: '6팀 선정' },
   { no: '04', apply: 'song', title: '용연가요제', capacity: '8팀 선정' },
-  { no: '05', apply: 'runner', title: '드래곤러너', capacity: '선착순 150명' },
-  { no: '06', apply: 'stamp', title: '찾아라 드래곤볼', capacity: '선착순 150명', note: '마감 후 현장 신청' },
+  { no: '05', apply: 'runner', title: '드래곤러너', capacity: '선착순 150명', note: '선착순 마감까지' },
+  { no: '06', apply: 'stamp', title: '찾아라 드래곤볼', capacity: '선착순 150명', note: '선착순 마감까지 · 이후 현장 신청' },
   { no: '07', apply: 'market', title: '플리마켓', capacity: '선착순 8팀', note: '모집기간 10. 8. ~ 10. 15.' },
   { no: '08', apply: 'foodtruck', title: '푸드트럭', capacity: '선착순 4팀', note: '모집기간 10. 8. ~ 10. 15.' },
 ]
