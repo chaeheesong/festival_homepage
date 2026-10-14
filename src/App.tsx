@@ -22,7 +22,7 @@ function Header() {
 
   return (
     <header className={`header${menuOpen ? ' header--open' : ''}`}>
-      <a href="#about" className="header__logo">용담용연 음악회 문화제</a>
+      <a href="#about" className="header__logo">2026 용담용연 음악회·문화제</a>
       <button
         type="button"
         className="header__menu-button"
@@ -77,8 +77,8 @@ function Hero() {
           <span className="hero__place">메인 무대</span>
         </div>
         <h1 className="hero__title">
-          <span className="desktop-only">용담·용연 음악회·문화제</span>
-          <span className="mobile-only">용담용연<br />음악회 문화제</span>
+          <span className="desktop-only">2026 용담용연 음악회·문화제</span>
+          <span className="mobile-only">2026 용담용연<br />음악회·문화제</span>
         </h1>
         <p className="hero__slogan">“용연, 천년의 물결을 잇다”</p>
         <div className="hero__lineup">
@@ -373,11 +373,11 @@ function Footer() {
       </div>
       <div className="footer__bottom">
         <div className="footer__credits">
-          <span className="desktop-only">2026 용담용연 음악회 문화제</span>
+          <span className="desktop-only">2026 용담용연 음악회·문화제</span>
           <span>주최·주관 : 제주시 용담1·2동 주민센터, 용담 축제위원회</span>
           <span>후원 : 한국공항공사 제주공항</span>
         </div>
-        <p className="footer__copyright">Copyright 2026 용담용연 음악회 문화제 All Rights Reserved.</p>
+        <p className="footer__copyright">Copyright 2026 용담용연 음악회·문화제 All Rights Reserved.</p>
       </div>
     </footer>
   )

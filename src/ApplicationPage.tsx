@@ -955,7 +955,7 @@ export default function ApplicationPage({ programKey }: { programKey: ProgramKey
   const [videoByEmail, setVideoByEmail] = useState(false)
 
   useEffect(() => {
-    document.title = `${p.name} 참가신청 | 2026 용담용연 음악회 문화제`
+    document.title = `${p.name} 참가신청 | 2026 용담용연 음악회·문화제`
   }, [p.name])
 
   return (
