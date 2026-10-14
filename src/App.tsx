@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { APPLY_PERIOD_LABEL, CONTACT_TEL, PROGRAMS, isApplyClosed } from './applications'
+import { CONTACT_TEL, PROGRAMS, isApplyClosed } from './applications'
 import type { Program as ApplyProgram, ProgramKey } from './applications'
 import { fetchRemaining } from './submitApplication'
 import { IMAGE_DIR, MAP, MOBILE_QUERY, artists, busStops, contacts, experiences, navItems, programs, sidePrograms, waves } from './data'
@@ -74,13 +74,13 @@ function Hero() {
           <span className="desktop-only">2026. 10. 31. 토요일</span>
           <span className="mobile-only">2026. 10. 31. (토)</span>
           <span className="hero__divider" aria-hidden />
-          <span className="hero__place">메인 무대</span>
+          <span className="hero__place">메인 무대 (용연구름다리 일대)</span>
         </div>
         <h1 className="hero__title">
           <span className="desktop-only">2026 용담용연 음악회·문화제</span>
           <span className="mobile-only">2026 용담용연<br />음악회·문화제</span>
         </h1>
-        <p className="hero__slogan">“용연, 천년의 물결을 잇다”</p>
+        <p className="hero__slogan">“용연, 천년의 물결(WAVE)을 잇다.”</p>
         <div className="hero__lineup">
           <p className="hero__lineup-label">출연</p>
           <ul className="hero__artists">
@@ -129,7 +129,7 @@ function Recruit() {
         <h2 className="heading-serif recruit__title">함께할 참가자를 모집합니다</h2>
         <div className="recruit__deadline">
           <span className="recruit__deadline-label">신청 기간</span>
-          <span className="recruit__deadline-date">{APPLY_PERIOD_LABEL}</span>
+          <span className="recruit__deadline-date">선착순 마감까지</span>
         </div>
       </div>
       <ul className="recruit__cards">
