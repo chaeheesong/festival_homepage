@@ -17,6 +17,13 @@ export const MAP = {
   kakaoUrl: 'https://kko.to/L4OXCh7Mn1',
 }
 
+// 오시는 길: nearby bus stops and the walk from each to the venue
+export const busStops = [
+  { stop: '사대부고', walk: '도보 9분' },
+  { stop: '용담사거리', walk: '도보 6분' },
+  { stop: '제주사대부설중학교', walk: '도보 7분' },
+]
+
 export const navItems = [
   { label: '행사안내', href: '#about' },
   { label: '참가신청', href: '#apply' },
@@ -33,6 +40,11 @@ const artistPhoto = (slug: string) => ({
 })
 
 export const artists = [
+  { name: '리글로우밴드', ...artistPhoto('reglowband') },
+  { name: '김민형', ...artistPhoto('kimminhyung') },
+  // Spaces let the long name wrap under the photo
+  { name: '제주울림 뮤지컬 어린이합창단', ...artistPhoto('jejuullim') },
+  { name: '고강민', ...artistPhoto('gokangmin') },
   { name: '우연이', ...artistPhoto('wooyeon') },
   { name: '먼데이 키즈', ...artistPhoto('mondaykiz') },
   { name: '장민호', ...artistPhoto('jangminho') },

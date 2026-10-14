@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import { APPLY_PERIOD_LABEL, CONTACT_TEL, PROGRAMS, isApplyClosed } from './applications'
 import type { Program as ApplyProgram, ProgramKey } from './applications'
 import { fetchRemaining } from './submitApplication'
-import { IMAGE_DIR, MAP, MOBILE_QUERY, artists, contacts, experiences, navItems, programs, sidePrograms, waves } from './data'
+import { IMAGE_DIR, MAP, MOBILE_QUERY, artists, busStops, contacts, experiences, navItems, programs, sidePrograms, waves } from './data'
 import './App.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/jeju_neulpureun?stkn=MTQ0d3VoaXV3YjBrdQ%3D%3D'
@@ -89,10 +89,10 @@ function Hero() {
                 <img
                   src={artist.image}
                   srcSet={artist.srcSet}
-                  sizes="(max-width: 768px) 96px, 160px"
+                  sizes="(max-width: 768px) 72px, 140px"
                   alt={artist.name}
-                  width={160}
-                  height={160}
+                  width={140}
+                  height={140}
                 />
                 <span>{artist.name}</span>
               </li>
@@ -318,6 +318,16 @@ function Location() {
         <p className="location__address">
           제주특별자치도 제주시 용담이동 461
         </p>
+        <div className="location__transit">
+          <p className="location__transit-title">대중교통 이용 안내</p>
+          <ul>
+            {busStops.map(({ stop, walk }) => (
+              <li key={stop}>
+                <strong>{stop}</strong> 정류장 하차 후 {walk}
+              </li>
+            ))}
+          </ul>
+        </div>
         <a
           className="pill-button pill-button--shadow location__button"
           href={DIRECTIONS_URL}

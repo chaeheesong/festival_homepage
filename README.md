@@ -32,6 +32,6 @@ npm run preview  # 빌드 결과 미리보기
 |---|---|---|
 | `hero-bg.png` | PC 첫 화면 배경 | 가로 2560px 이상, 중요한 부분은 가운데 |
 | `hero-bg-mobile.png` | 모바일 첫 화면 배경 | 세로형 약 1080 × 1550 |
-| `artist-*.png` | 출연진 사진 | 정사각형에 가깝게 (위쪽 기준으로 잘림) |
+| `artist-<영문이름>-{124,248,372}.jpg` | 출연진 사진 | 얼굴 중심 정사각형, 세 크기 모두 필요. `src/data.ts`의 `artists`에 순서대로 추가 |
 | `experience-*.png` | 체험존 카드 배경 (PC / `-mobile`) | |
 | `map.png` | 약도 | 2 : 1, 교체 시 `src/data.ts`의 `MAP` 크기·마커 위치도 수정 |

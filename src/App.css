@@ -210,23 +210,30 @@
 
 .hero__lineup-label {
   font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 1.56px;
+  font-size: 18px;
+  letter-spacing: 2.16px;
   color: var(--paper);
 }
 
 .hero__artists {
   display: flex;
-  gap: 36px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px 24px;
 }
 
+/* Fixed width so long names wrap under their photo instead of widening the row */
 .hero__artists li {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  width: 140px;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 16px;
+  line-height: 1.3;
+  word-break: keep-all;
   color: var(--paper);
   text-shadow: 0 3px 7px rgba(0, 0, 0, 0.25);
 }
@@ -234,13 +241,13 @@
 /* Thin black outline so the names and "출연" stay readable on the bright photo */
 .hero__lineup-label,
 .hero__artists li span {
-  -webkit-text-stroke: 0.8px #000000;
+  -webkit-text-stroke: 1px #000000;
   paint-order: stroke fill;
 }
 
 .hero__artists img {
-  width: 160px;
-  height: 160px;
+  width: 140px;
+  height: 140px;
   object-fit: cover;
   object-position: top;
 }
@@ -781,6 +788,42 @@
   color: var(--slate);
 }
 
+.location__transit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.location__transit-title {
+  font-weight: 700;
+  font-size: 16.7px;
+  color: var(--navy-800);
+}
+
+.location__transit li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 15.5px;
+  line-height: 26px;
+  color: var(--slate);
+}
+
+.location__transit li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.location__transit strong {
+  font-weight: 700;
+  color: var(--navy-800);
+}
+
 /* ---------- Instagram ---------- */
 
 .instagram {
@@ -1016,23 +1059,27 @@
   }
 
   .hero__lineup-label {
-    font-size: 12px;
-    letter-spacing: 1.44px;
+    font-size: 15px;
+    letter-spacing: 1.8px;
   }
 
+  /* Always 4 per row (then 3) on any phone width, so 우연이 starts the second row;
+     max-width = 4 items (78px) + 3 gaps (2px). Fits 360px-wide phones */
   .hero__artists {
-    gap: 14px;
+    gap: 14px 2px;
+    max-width: 318px;
   }
 
   .hero__artists li {
-    gap: 8px;
-    font-size: 14.9px;
+    gap: 6px;
+    width: 78px;
+    font-size: 12px;
     text-shadow: 0 2px 7px rgba(0, 0, 0, 0.5);
   }
 
   .hero__artists img {
-    width: 96px;
-    height: 96px;
+    width: 72px;
+    height: 72px;
   }
 
   /* Shared headings */
@@ -1340,6 +1387,22 @@
     font-size: 13.9px;
     line-height: 22.5px;
     color: var(--navy-800);
+  }
+
+  .location__transit-title {
+    font-size: 13.9px;
+  }
+
+  .location__transit li {
+    padding-left: 12px;
+    font-size: 13.9px;
+    line-height: 22.5px;
+  }
+
+  .location__transit li::before {
+    top: 9px;
+    width: 4px;
+    height: 4px;
   }
 
   .location__button {
