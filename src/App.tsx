@@ -89,10 +89,10 @@ function Hero() {
                 <img
                   src={artist.image}
                   srcSet={artist.srcSet}
-                  sizes="(max-width: 768px) 72px, 140px"
+                  sizes="(max-width: 768px) 72px, 124px"
                   alt={artist.name}
-                  width={140}
-                  height={140}
+                  width={124}
+                  height={124}
                 />
                 <span>{artist.name}</span>
               </li>
@@ -321,9 +321,15 @@ function Location() {
         <div className="location__transit">
           <p className="location__transit-title">대중교통 이용 안내</p>
           <ul>
-            {busStops.map(({ stop, walk }) => (
+            {busStops.map(({ stop, walk, routes }) => (
               <li key={stop}>
                 <strong>{stop}</strong> 정류장 하차 후 {walk}
+                {routes.map(({ toward, buses }) => (
+                  <span key={toward ?? ''} className="location__buses">
+                    {toward && `(${toward}) `}
+                    {buses.join(', ')}번
+                  </span>
+                ))}
               </li>
             ))}
           </ul>

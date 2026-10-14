@@ -17,11 +17,20 @@ export const MAP = {
   kakaoUrl: 'https://kko.to/L4OXCh7Mn1',
 }
 
-// 오시는 길: nearby bus stops and the walk from each to the venue
-export const busStops = [
-  { stop: '사대부고', walk: '도보 9분' },
-  { stop: '용담사거리', walk: '도보 6분' },
-  { stop: '제주사대부설중학교', walk: '도보 7분' },
+// 오시는 길: nearby bus stops, the walk from each to the venue, and the routes stopping there
+// (all run every day per bus.jeju.go.kr timetables, so they also serve the Saturday event)
+// (routes split by direction when the stop's two sides are served by different buses)
+export const busStops: { stop: string; walk: string; routes: { toward?: string; buses: string[] }[] }[] = [
+  { stop: '사대부고', walk: '도보 9분', routes: [{ buses: ['440', '442', '445', '447'] }] },
+  { stop: '용담사거리', walk: '도보 6분', routes: [{ buses: ['432', '440', '441', '444', '447', '453', '462'] }] },
+  {
+    stop: '제주사대부설중학교',
+    walk: '도보 7분',
+    routes: [
+      { toward: '사대부고 방면', buses: ['431', '454'] },
+      { toward: '용두암현대1차아파트 방면', buses: ['432', '453'] },
+    ],
+  },
 ]
 
 export const navItems = [
@@ -41,6 +50,7 @@ const artistPhoto = (slug: string) => ({
 
 export const artists = [
   { name: '리글로우밴드', ...artistPhoto('reglowband') },
+  { name: '달리다가밴드', ...artistPhoto('dalridaga') },
   { name: '김민형', ...artistPhoto('kimminhyung') },
   // Spaces let the long name wrap under the photo
   { name: '제주울림 뮤지컬 어린이합창단', ...artistPhoto('jejuullim') },
