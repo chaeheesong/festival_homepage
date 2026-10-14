@@ -1102,7 +1102,8 @@
   }
 
   .hero__artists li.is-headliner {
-    order: -1;
+    /* Ahead of the others (order 0), in the position set in data.ts */
+    order: calc(var(--headliner) - 10);
     width: 96px;
     font-size: 13px;
     letter-spacing: 0;

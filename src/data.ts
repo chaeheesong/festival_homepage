@@ -48,17 +48,17 @@ const artistPhoto = (slug: string) => ({
   srcSet: [124, 248, 372].map((w) => `${IMAGE_DIR}/artist-${slug}-${w}.jpg ${w}w`).join(', '),
 })
 
-// headliner: shown on its own top row on phones
-export const artists: { name: string; image: string; srcSet: string; headliner?: boolean }[] = [
+// headliner: shown on its own top row on phones, in this position (1 = left); PC keeps the list order
+export const artists: { name: string; image: string; srcSet: string; headliner?: number }[] = [
   { name: '리글로우밴드', ...artistPhoto('reglowband') },
   { name: '달리다가밴드', ...artistPhoto('dalridaga') },
   { name: '김민형', ...artistPhoto('kimminhyung') },
   // Spaces let the long name wrap under the photo
   { name: '제주울림 뮤지컬 어린이합창단', ...artistPhoto('jejuullim') },
   { name: '고강민', ...artistPhoto('gokangmin') },
-  { name: '우연이', ...artistPhoto('wooyeon'), headliner: true },
-  { name: '먼데이 키즈', ...artistPhoto('mondaykiz'), headliner: true },
-  { name: '장민호', ...artistPhoto('jangminho'), headliner: true },
+  { name: '우연이', ...artistPhoto('wooyeon'), headliner: 3 },
+  { name: '먼데이 키즈', ...artistPhoto('mondaykiz'), headliner: 2 },
+  { name: '장민호', ...artistPhoto('jangminho'), headliner: 1 },
 ]
 
 export type Program = {

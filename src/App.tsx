@@ -85,7 +85,11 @@ function Hero() {
           <p className="hero__lineup-label">출연</p>
           <ul className="hero__artists">
             {artists.map((artist) => (
-              <li key={artist.name} className={artist.headliner ? 'is-headliner' : undefined}>
+              <li
+                key={artist.name}
+                className={artist.headliner ? 'is-headliner' : undefined}
+                style={artist.headliner ? ({ '--headliner': artist.headliner } as CSSProperties) : undefined}
+              >
                 <img
                   src={artist.image}
                   srcSet={artist.srcSet}
