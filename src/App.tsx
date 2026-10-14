@@ -85,11 +85,11 @@ function Hero() {
           <p className="hero__lineup-label">출연</p>
           <ul className="hero__artists">
             {artists.map((artist) => (
-              <li key={artist.name}>
+              <li key={artist.name} className={artist.headliner ? 'is-headliner' : undefined}>
                 <img
                   src={artist.image}
                   srcSet={artist.srcSet}
-                  sizes="(max-width: 768px) 72px, 124px"
+                  sizes="(max-width: 768px) 84px, 124px"
                   alt={artist.name}
                   width={124}
                   height={124}

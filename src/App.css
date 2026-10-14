@@ -1080,23 +1080,37 @@
     letter-spacing: 1.8px;
   }
 
-  /* Always 4 per row on any phone width (4 + 4);
-     max-width = 4 items (78px) + 3 gaps (2px). Fits 360px-wide phones */
+  /* Headliners (우연이, 먼데이 키즈, 장민호) move up to a row of their own, the other 5 below.
+     max-width = 5 bottom items (64px): the 5 fill one row, and 3 headliners (96px) + 1 more
+     can't, so the rows always split 3 + 5. Spacing comes from the item widths. Fits 360px phones */
   .hero__artists {
-    gap: 14px 2px;
-    max-width: 318px;
+    gap: 14px 0;
+    max-width: 320px;
   }
 
   .hero__artists li {
     gap: 6px;
-    width: 78px;
-    font-size: 12px;
+    width: 64px;
+    font-size: 10px;
+    letter-spacing: -0.3px; /* keeps 6-letter names (리글로우밴드) from touching their neighbours */
     text-shadow: 0 2px 7px rgba(0, 0, 0, 0.5);
   }
 
   .hero__artists img {
-    width: 72px;
-    height: 72px;
+    width: 60px;
+    height: 60px;
+  }
+
+  .hero__artists li.is-headliner {
+    order: -1;
+    width: 96px;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+
+  .hero__artists li.is-headliner img {
+    width: 84px;
+    height: 84px;
   }
 
   /* Shared headings */
