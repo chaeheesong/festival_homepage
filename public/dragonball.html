@@ -750,7 +750,7 @@
         document.getElementById('card-name').textContent = name
         document.getElementById('card-desc').innerHTML = `<b>${dragon}</b> · ${hint}`
         document.getElementById('card-link').href =
-          'https://map.kakao.com/link/search/' + encodeURIComponent(`제주 용담 ${name.replace(/ 터$/, '')}`)
+          'https://map.kakao.com/link/search/' + encodeURIComponent(name.replace(/ 터$/, ''))
         if (map) reveal(i)
       }
 
