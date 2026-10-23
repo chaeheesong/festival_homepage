@@ -278,8 +278,6 @@
         position: absolute;
         left: 0;
         top: 0;
-        transform-origin: 0 0;
-        will-change: transform;
       }
 
       .stage img {
@@ -816,7 +814,10 @@
 
       function apply() {
         clamp()
-        stage.style.transform = `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`
+        // Sized in real pixels (not a scale() transform) so the browser always draws the map sharp
+        stage.style.width = `${map.width * view.scale}px`
+        stage.style.height = `${map.height * view.scale}px`
+        stage.style.transform = `translate(${view.tx}px, ${view.ty}px)`
         pins.forEach((pin, i) => {
           const [x, y] = point(i)
           pin.style.left = `${view.tx + x * view.scale}px`
@@ -828,8 +829,6 @@
         const next = mq.matches ? MAPS.mobile : MAPS.pc
         if (next === map) return fit()
         map = next
-        stage.style.width = `${map.width}px`
-        stage.style.height = `${map.height}px`
         route.setAttribute('viewBox', `0 0 ${map.width} ${map.height}`)
         route.firstElementChild.setAttribute('points', STATIONS.map((_, i) => point(i).join(',')).join(' '))
         img.src = map.src
