@@ -569,6 +569,26 @@
   color: rgba(243, 244, 249, 0.82);
 }
 
+/* A row that opens a program's page */
+.timetable__row--link {
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.timetable__row--link:hover,
+.timetable__row--link:focus-visible {
+  background: rgba(243, 244, 249, 0.06);
+}
+
+.timetable__more {
+  margin-left: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
 /* ---------- Experience ---------- */
 
 .experience {

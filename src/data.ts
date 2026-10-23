@@ -86,8 +86,8 @@ export type Wave = {
   label: string
   theme?: string
   color: string
-  /** detail: a "\n" starts a new line */
-  items: { title: string; time: string; detail: string }[]
+  /** detail: a "\n" starts a new line; href: the whole row links there (e.g. a program's page) */
+  items: { title: string; time: string; detail: string; href?: string }[]
 }
 
 export const waves: Wave[] = [
@@ -129,7 +129,7 @@ export const waves: Wave[] = [
 
 /** Side programs, shown as their own table below the main schedule */
 export const sidePrograms: Wave['items'] = [
-  { title: '찾아라 드래곤볼', time: '11:00 ~ 17:30', detail: '스탬프 투어' },
+  { title: '찾아라 드래곤볼', time: '11:00 ~ 17:30', detail: '스탬프 투어', href: '?p=stamp' },
   { title: '드래곤 러너', time: '18:30 ~ 20:30', detail: '야간 러닝' },
 ]
 

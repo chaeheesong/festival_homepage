@@ -213,13 +213,27 @@ function Schedule() {
           </div>
           <div className="timetable__group" role="rowgroup">
             <div className="timetable__rows">
-              {sidePrograms.map((item) => (
-                <div key={item.title} className="timetable__row" role="row">
-                  <span role="cell" className="col-title">{item.title}</span>
-                  <span role="cell" className="col-time">{item.time}</span>
-                  <span role="cell" className="col-detail">{item.detail}</span>
-                </div>
-              ))}
+              {sidePrograms.map((item) => {
+                const cells = (
+                  <>
+                    <span role="cell" className="col-title">{item.title}</span>
+                    <span role="cell" className="col-time">{item.time}</span>
+                    <span role="cell" className="col-detail">
+                      {item.detail}
+                      {item.href && <span className="timetable__more">안내 보기 →</span>}
+                    </span>
+                  </>
+                )
+                return item.href ? (
+                  <a key={item.title} className="timetable__row timetable__row--link" role="row" href={item.href}>
+                    {cells}
+                  </a>
+                ) : (
+                  <div key={item.title} className="timetable__row" role="row">
+                    {cells}
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>
