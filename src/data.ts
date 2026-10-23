@@ -129,7 +129,7 @@ export const waves: Wave[] = [
 
 /** Side programs, shown as their own table below the main schedule */
 export const sidePrograms: Wave['items'] = [
-  { title: '찾아라 드래곤볼', time: '11:00 ~ 17:30', detail: '스탬프 투어', href: '?p=stamp' },
+  { title: '찾아라 드래곤볼', time: '11:00 ~ 17:30', detail: '스탬프 투어', href: '/dragonball.html' },
   { title: '드래곤 러너', time: '18:30 ~ 20:30', detail: '야간 러닝' },
 ]
 

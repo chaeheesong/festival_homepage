@@ -5,6 +5,11 @@
   Cache-Control: no-cache
 /index.html
   Cache-Control: no-cache
+# 찾아라 드래곤볼 지도 안내 (Cloudflare serves /dragonball.html at /dragonball)
+/dragonball
+  Cache-Control: no-cache
+/dragonball.html
+  Cache-Control: no-cache
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 # Image files keep the same names when replaced, so only cache them briefly
