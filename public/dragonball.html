@@ -692,12 +692,13 @@
       }
       const MOBILE_QUERY = '(max-width: 768px)'
 
-      // [name, dragon, hint, x, y] — x/y: where the pin's tip sits on the PC map
+      // [name, dragon, hint, x, y, search?] — x/y: where the pin's tip sits on the PC map;
+      // search: what 길찾기 looks up on Kakao Map (default: the name without a trailing " 터")
       const STATIONS = [
         ['용연구름다리', '용의 시작', '용연의 물결', 659, 434],
         ['갈마수', '생명의 용', '마을의 샘물', 759, 243],
         ['서자복', '소원의 용', '마을의 소망', 716, 352],
-        ['배고픈다리 터', '추억의 용', '옛 다리의 기억', 918, 472],
+        ['배고픈다리 터', '추억의 용', '옛 다리의 기억', 918, 472, '제주특별자치도 제주시 탑동로 120-1'],
         ['비룡못 터', '전설의 용', '비룡의 이야기', 935, 745],
         ['제주향교', '지혜의 용', '제주의 역사', 746, 847],
         ['고시락당', '기원의 용', '마을의 안녕', 656, 527],
@@ -743,14 +744,14 @@
 
       function select(i) {
         sel = i
-        const [name, dragon, hint] = STATIONS[i]
+        const [name, dragon, hint, , , search] = STATIONS[i]
         pins.forEach((p, j) => p.setAttribute('aria-current', String(j === i)))
         rows.forEach((r, j) => r.setAttribute('aria-current', String(j === i)))
         document.getElementById('card-no').textContent = `${i + 1}번 드래곤볼`
         document.getElementById('card-name').textContent = name
         document.getElementById('card-desc').innerHTML = `<b>${dragon}</b> · ${hint}`
         document.getElementById('card-link').href =
-          'https://map.kakao.com/link/search/' + encodeURIComponent(name.replace(/ 터$/, ''))
+          'https://map.kakao.com/link/search/' + encodeURIComponent(search ?? name.replace(/ 터$/, ''))
         if (map) reveal(i)
       }
 
