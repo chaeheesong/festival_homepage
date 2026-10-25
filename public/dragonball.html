@@ -376,6 +376,7 @@
 
       .card {
         position: absolute;
+        z-index: 1; /* above the map's pins */
         left: 24px;
         bottom: 24px;
         width: 420px;
@@ -451,6 +452,35 @@
 
       .card.is-open .card__story {
         display: block;
+      }
+
+      /* 16:9 like the photos themselves, so nothing is cropped and the pin stays on its spot */
+      .card__photo {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--map-bg);
+      }
+
+      .card__photo[hidden] {
+        display: none;
+      }
+
+      .card__photo img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .card__photo .pin {
+        pointer-events: none;
+      }
+
+      .card__photo .pin__stem {
+        background: #fff;
       }
 
       .card__story .eyebrow {
@@ -757,6 +787,10 @@
               </div>
             </div>
             <div class="card__story" id="card-story">
+              <figure class="card__photo" id="card-photo">
+                <img id="card-photo-img" alt="" />
+                <span class="pin" aria-current="true"><span class="pin__ball" id="card-photo-no"></span><span class="pin__stem"></span></span>
+              </figure>
               <p class="eyebrow">장소 이야기</p>
               <div class="card__text" id="card-text"></div>
             </div>
@@ -794,6 +828,17 @@
         ['제주향교', '지혜의 용', '제주의 역사', 746, 847],
         ['고시락당', '기원의 용', '마을의 안녕', 684, 481, '제주특별자치도 제주시 용담일동 2579-1'],
       ]
+
+      // Photo shown above a spot's story: [src, x%, y%] — x/y: where the pin's tip sits on the photo (1200 x 675)
+      const PHOTOS = {
+        용연구름다리: ['/asset/image/dragonball-photo-1.jpg', 43.7, 61.6],
+        서자복: ['/asset/image/dragonball-photo-2.jpg', 50.6, 48.7],
+        갈마수: ['/asset/image/dragonball-photo-3.jpg', 43.9, 50.3],
+        '배고픈다리 터': ['/asset/image/dragonball-photo-4.jpg', 47.3, 57.0],
+        '비룡못 터': ['/asset/image/dragonball-photo-5.jpg', 54.8, 50.7],
+        제주향교: ['/asset/image/dragonball-photo-6.jpg', 37.2, 58.5],
+        고시락당: ['/asset/image/dragonball-photo-7.jpg', 40.2, 48.4],
+      }
 
       // 장소 이야기 shown when a spot's card is opened, one string per paragraph (a spot without one shows no story)
       const STORIES = {
@@ -897,6 +942,16 @@
         document.getElementById('card-text').replaceChildren(
           ...story.map((text) => Object.assign(document.createElement('p'), { textContent: text })),
         )
+        const photo = PHOTOS[name]
+        const photoEl = document.getElementById('card-photo')
+        photoEl.hidden = !photo
+        if (photo) {
+          const [src, px, py] = photo
+          document.getElementById('card-photo-img').src = src
+          document.getElementById('card-photo-img').alt = `${name} 위치 사진`
+          document.getElementById('card-photo-no').textContent = i + 1
+          Object.assign(photoEl.querySelector('.pin').style, { left: `${px}%`, top: `${py}%` })
+        }
         document.getElementById('card-story').scrollTop = 0
         document.getElementById('card-link').href =
           'https://map.kakao.com/link/search/' + encodeURIComponent(search ?? name.replace(/ 터$/, ''))
