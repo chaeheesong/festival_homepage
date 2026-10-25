@@ -378,7 +378,10 @@
         position: absolute;
         left: 24px;
         bottom: 24px;
-        width: 380px;
+        width: 420px;
+        max-height: calc(100% - 92px);
+        display: flex;
+        flex-direction: column;
         background: #fff;
         border-radius: 14px;
         box-shadow: 0 10px 30px rgba(29, 35, 64, 0.18);
@@ -386,17 +389,82 @@
         cursor: auto;
       }
 
+      /* Spots with a story: tap the head (or 접기) to open/close it */
+      .card.has-story .card__head {
+        cursor: pointer;
+      }
+
+      .card__handle {
+        display: none;
+        width: 40px;
+        height: 4px;
+        margin: 8px auto 0;
+        border-radius: 2px;
+        background: #d6cbb3;
+      }
+
+      .card.has-story .card__handle {
+        display: block;
+      }
+
       .card__body {
         padding: 18px 20px 16px;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
+      }
+
+      .card.has-story .card__body {
+        padding-top: 10px;
+      }
+
+      .card__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
 
       .card__no {
         font-size: 12px;
         font-weight: 700;
         color: var(--rust);
+      }
+
+      .card__toggle {
+        display: none;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .card.has-story .card__toggle {
+        display: block;
+      }
+
+      .card__story {
+        display: none;
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        padding: 0 20px 16px;
+      }
+
+      .card.is-open .card__story {
+        display: block;
+      }
+
+      .card__story .eyebrow {
+        margin: 4px 0 12px;
+      }
+
+      .card__text {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--text2);
+        text-wrap: pretty;
       }
 
       .card__name {
@@ -417,6 +485,7 @@
       }
 
       .card__foot {
+        flex: none;
         display: flex;
         justify-content: flex-end;
         padding: 12px 20px 16px;
@@ -533,17 +602,26 @@
           height: 42px;
         }
 
+        /* Bottom sheet */
         .card {
-          left: 12px;
-          right: 12px;
-          bottom: 12px;
+          left: 0;
+          right: 0;
+          bottom: 0;
           width: auto;
-          border-radius: 18px;
+          max-height: 92%;
+          border-radius: 20px 20px 0 0;
+          box-shadow: 0 -6px 24px rgba(29, 35, 64, 0.18);
+        }
+
+        .card__handle {
+          height: 5px;
+          margin-top: 10px;
+          border-radius: 3px;
         }
 
         .card__body {
-          padding: 16px 16px 0;
-          gap: 8px;
+          padding: 16px 18px 12px;
+          gap: 6px;
         }
 
         .card__name {
@@ -551,9 +629,20 @@
           line-height: 1.2;
         }
 
+        .card__desc {
+          line-height: 1.5;
+        }
+
+        .card__story {
+          padding: 0 18px 12px;
+        }
+
+        .card__text {
+          font-size: 14px;
+        }
+
         .card__foot {
-          padding: 12px 16px 16px;
-          border: 0;
+          padding: 10px 18px 14px;
         }
 
         .directions {
@@ -656,10 +745,20 @@
             <span><i style="width: 18px; height: 0; border-radius: 0; border-top: 2px dashed #c2570c"></i>추천 경로</span>
           </div>
           <article class="card" id="card" aria-live="polite">
-            <div class="card__body">
-              <p class="card__no" id="card-no"></p>
-              <h2 class="card__name" id="card-name"></h2>
-              <p class="card__desc" id="card-desc"></p>
+            <div class="card__head" id="card-head">
+              <span class="card__handle" aria-hidden="true"></span>
+              <div class="card__body">
+                <div class="card__row">
+                  <p class="card__no" id="card-no"></p>
+                  <button class="card__toggle" id="card-toggle" aria-controls="card-story"></button>
+                </div>
+                <h2 class="card__name" id="card-name"></h2>
+                <p class="card__desc" id="card-desc"></p>
+              </div>
+            </div>
+            <div class="card__story" id="card-story">
+              <p class="eyebrow">장소 이야기</p>
+              <div class="card__text" id="card-text"></div>
             </div>
             <div class="card__foot">
               <a class="directions" id="card-link" target="_blank" rel="noreferrer">길찾기</a>
@@ -696,6 +795,52 @@
         ['고시락당', '기원의 용', '마을의 안녕', 684, 481, '제주특별자치도 제주시 용담일동 2579-1'],
       ]
 
+      // 장소 이야기 shown when a spot's card is opened, one string per paragraph (a spot without one shows no story)
+      const STORIES = {
+        용연구름다리: [
+          '다소 위험하게 출렁이던 작은 구름다리를 철거하고 새로만든 구름다리이다. 용연 구름다리는 동한두기와 서한두기를 잇는 다리인데 용연 위에 너비 2.2m, 길이 42m의 현수교 형태로 주탑 6m 기둥 4개에 와이어로 연결하여 출렁거리는 구름다리로 가설되어 있다.',
+        ],
+        갈마수: [
+          '목마른 말이 물을 먹는다 하여 갈마수, 가막소이라 불렀고 한두기 마을의 근원이 되었다.',
+          '물이 시원하고 좋아서 옛날에 식수로 사용하거나, 빨래나 목욕을 하기도 하였으며 현재 용천수 목욕탕으로 사용하고 있다.',
+        ],
+        서자복: [
+          '서쪽에는 서자복이 있고 동쪽에는 옛날 건입동에, 동자복이 마주 보게 지었다고한다.',
+          '원도심 개발 전 건물들이 지어지기 이전에는 제주 성안까지 다 보이고, 동자복과 마주보며 성안을 지키는 수호신으로 여겼다.',
+          '서자복은 제주시 용담동 해륜사지 옛터(제주시 동한두기길 7-6, 현재 용화사)에 보존되어 있는 미륵으로, ‘복신미륵’, ‘자복신’, ‘자복미륵’, ‘미륵불’, ‘큰어른’ 등의 이름으로 불리며, 옛 제주성의 서쪽에 성안을 수호하듯 세워져 있었다.',
+          '제작 시기는 정확히 알 수 없지만 고려 후기의 불상이 토속적으로 변모하는 과정 중의 한 양상인 것으로 보아 고려 후 기로 추정되며, 머리에 씌워진 대패랭이와 비슷한 모양의 벙거지는 조선 후기에 새롭게 제작된 것으로 추정된다.',
+          '서자복은 신장 273㎝, 얼굴 길이 135㎝, 신부 길이 138㎝, 신부 둘레 315㎝, 기단 높이 66㎝, 기단 둘레 335㎝, 감투 둘레 135㎝이며. 제주산 다공질 현무암으로 만들어졌고 패랭이와 비슷한 모양의 벙거지를 쓴 입상이다.',
+          '기단 위의 석상은 하체가 없고 양손은 가지런히 펴 가슴에 대고 있으며, 움츠려 있는 듯한 귀, 뚜렷한 입술, 옆으로 길게 감은 듯한 눈, 둥근형의 머리 부위 등 전체적인 인상은 자비롭고 조용한 분위기이다. 법의는 통견이지만 목과 어깨 부분에서 하단부까지 앞이 터진 도포 같은 것을 입고 있는데, 문양 표현이 없는 등 토속적인 양식을 잘 보여주고 있다.',
+        ],
+        제주향교: [
+          '관덕정을 지나 용담로터리 쪽으로 가다보면 길 오른편에 제주향교(제주시 서문로 43번지)가 있다.',
+          '30,248㎡ 면적에 후원에는 30여 그루의 장송이 우거져 있고, 향교 안에는 명륜당·대성전·계성사(啓聖祠) 등의 건물이 남아 있다.',
+          '1971년 8월 26일 제주도유형문화재 제2호로 지정 되었으며, 제주향교 대성전은 2016년 6월 13일 보물 제1902호로 지정되었다.',
+          '향교재단에서 소유하고 있으며 제주민을 교육ㆍ교화하고 현유(賢儒)의 위패를 봉안ㆍ배향하기 위하여 1392년(태조 원년) 제주성 교동(校洞)에 창건하였네. 그 뒤1435년(세종 17) 안무사 최해산(崔海山) 이 중건하였고 1466년(세조 12) 절제사 이유의(李由義)가 중수하였으며, 1536년(중종 31) 목사 심연원(沈連源)이 명륜당을 개축하고 향학당을 건립하였다.',
+        ],
+        고시락당: [
+          '고시락당은 한두기 마을 본향당으로 용연 다리가 있는 곳에서 100여m 떨어진 용연 냇가 인적이 드문 곳에 있다.',
+          '당신인 ‘용해국대부인’은 목사의 뱃고사를 받아먹고 어부와 잠녀의 소망을 이루어 준다고 해서 용담동 한두기 주민들이 생기에 맞춰 택일하여 다니는데 당에 갈 때에는 메 네 그릇을 뜨고 간다.',
+          '이는 용해국대부인의 신위수가 넷임을 뜻한다.',
+          '당은 ５평 정도로 규모는 작으나 용연 오솔길 옆 암벽 위에 있어 신목과 신석, 그리고 지전물색들이 서로 어울려 분위기를 신비롭게 만든다.',
+          '이 당의 본향당신은 생산·물고·호적을 차지한 신이기도 하지만, 해신(海神)이기도 해서 일만의 어부와 일만의 잠수부를 차지하여 어로의 풍요를 가져다준다.',
+          '때문에 이 당에 다니는 사람들이 바닷가에서 용왕제를 하고 제를 드린 후에 이곳에 와서 바다의 안녕을 빈다.',
+        ],
+        '비룡못 터': [
+          '용담1동 원도심 골목 안쪽에 \'비룡못 터\'가 있다.',
+          '\'용이 날아가 버린 곳\'이라는 뜻에서 주민들 사이에 \'비룡못\'이라 불렸는데, 예부터 이 일대에는 용천수가 넉넉히 솟아올라 \'비룡못 동네\'라는 별칭으로도 통했다.',
+          '물이 귀하던 시절, 이곳은 물을 길으러 온 주민들이 자연스레 마당에 모여 소식을 나누고 정을 쌓던 마을 광장이자 삶의 중심지였다.',
+          '지금은 용담1동 도시재생 활성화 사업으로 옛 덕훈이용원 건물 등과 함께 정비돼, 주민 커뮤니티 공간이자 벚꽃 명소인 \'비룡못 어울림마당\'으로 다시 태어났다.',
+        ],
+        '배고픈다리 터': [
+          '병문천을 따라 걷다 보면 \'배고픈다리 터\'를 만날 수 있다.',
+          '삼도동 무근성과 용담1동 부러리 동네 사이를 흐르는 병문천(병문내)에 놓였던 작은 다리가 있던 자리다.',
+          '제주읍성 서쪽의 무근성에서 부러리, 동한두기 등 용담동 마을로 건너가려면 이 다리를 지나야 했는데, 걸어서 오갈 수 있는 유일한 통로이자 가장 빠른 지름길이었다고 전해진다.',
+          '다리 가운데가 아래로 오목하게 꺼진 모양새라서 \'배고픈다리\'라는 이름이 붙었다는 이야기가 있다.',
+          '이른 새벽이면 아침밥을 지으려는 아낙네들이 이 다리를 건너 병문천 가의 용천수 \'선반물\'로 물을 길으러 다녔다고 하니, 고단했던 서민들의 삶과 애환이 고스란히 배어 있는 곳이다.',
+        ],
+      }
+
 
       // The walking route on the PC map (x,y pairs, traced from the organizer's drawing):
       // a loop from 용연구름다리 past every spot, with an out-and-back to 갈마수
@@ -721,7 +866,7 @@
         pin.className = 'pin'
         pin.setAttribute('aria-label', `${i + 1}번 ${name}`)
         pin.innerHTML = `<span class="pin__ball">${i + 1}</span><span class="pin__stem"></span>`
-        pin.addEventListener('click', () => select(i))
+        pin.addEventListener('click', () => select(i, true))
         pinsEl.append(pin)
         return pin
       })
@@ -729,7 +874,7 @@
       const rows = STATIONS.map(([name], i) => {
         const li = document.createElement('li')
         li.innerHTML = `<button><span class="dot">${i + 1}</span>${name}</button>`
-        li.firstChild.addEventListener('click', () => select(i))
+        li.firstChild.addEventListener('click', () => select(i, true))
         listEl.append(li)
         return li.firstChild
       })
@@ -739,18 +884,44 @@
         return [x + map.offset[0], y + map.offset[1]]
       }
 
-      function select(i) {
+      // Picking a spot opens its story; the first spot shown on load starts closed
+      function select(i, open = false) {
         sel = i
         const [name, dragon, hint, , , search] = STATIONS[i]
+        const story = STORIES[name] ?? []
         pins.forEach((p, j) => p.setAttribute('aria-current', String(j === i)))
         rows.forEach((r, j) => r.setAttribute('aria-current', String(j === i)))
         document.getElementById('card-no').textContent = `${i + 1}번 드래곤볼`
         document.getElementById('card-name').textContent = name
         document.getElementById('card-desc').innerHTML = `<b>${dragon}</b> · ${hint}`
+        document.getElementById('card-text').replaceChildren(
+          ...story.map((text) => Object.assign(document.createElement('p'), { textContent: text })),
+        )
+        document.getElementById('card-story').scrollTop = 0
         document.getElementById('card-link').href =
           'https://map.kakao.com/link/search/' + encodeURIComponent(search ?? name.replace(/ 터$/, ''))
+        card.classList.toggle('has-story', story.length > 0)
+        // Place the spot above the closed card, so it is in view again once the card is folded
+        setOpen(false)
         if (map) reveal(i)
+        setOpen(open && story.length > 0)
       }
+
+      function setOpen(open) {
+        card.classList.toggle('is-open', open)
+        const toggle = document.getElementById('card-toggle')
+        toggle.textContent = open ? '접기 ▾' : '이야기 보기 ▴'
+        toggle.setAttribute('aria-expanded', String(open))
+      }
+
+      document.getElementById('card-head').addEventListener('click', () => {
+        if (card.classList.contains('has-story')) setOpen(!card.classList.contains('is-open'))
+      })
+
+      // Tapping anywhere outside the card (other than a spot) closes it
+      document.addEventListener('pointerdown', (e) => {
+        if (!e.target.closest('.card, .pin, .stations button')) setOpen(false)
+      })
 
       // Pan just enough to bring a spot into the uncovered area
       function reveal(i) {
