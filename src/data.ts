@@ -15,6 +15,13 @@ export const MAP = {
   // Pin inside the event area, as a % of the image
   marker: { x: '40.5%', y: '45.9%' },
   kakaoUrl: 'https://kko.to/L4OXCh7Mn1',
+  // Parking lot east of 용연 by 한두기 마을회관: its outline in image pixels, and where its label's top sits (% of the image)
+  parking: {
+    area: '905,345 930,343 955,350 963,366 957,384 932,390 910,386 902,368',
+    label: { x: '46.6%', y: '39.4%' },
+    address: '제주특별자치도 제주시 용담1동 382-10',
+    note: '약 60대 주차 가능',
+  },
 }
 
 // 오시는 길: nearby bus stops, the walk from each to the venue, and the routes stopping there

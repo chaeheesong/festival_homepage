@@ -8,6 +8,7 @@ import './App.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/jeju_neulpureun?stkn=MTQ0d3VoaXV3YjBrdQ%3D%3D'
 const DIRECTIONS_URL = 'https://naver.me/xAfCEpym'
+const PARKING_URL = 'https://map.kakao.com/link/search/' + encodeURIComponent(MAP.parking.address)
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -292,13 +293,8 @@ function Experience() {
 function Location() {
   return (
     <section id="location" className="location">
-      <a
-        className="location__map"
-        href={MAP.kakaoUrl}
-        target="_blank"
-        rel="noreferrer"
-        aria-label="카카오맵에서 메인 무대 위치 보기"
-      >
+      {/* The pin / area of each place links to that place's Kakao Map */}
+      <div className="location__map">
         <div
           className="location__map-canvas"
           style={
@@ -316,18 +312,42 @@ function Location() {
             preserveAspectRatio="none"
             aria-hidden
           >
-            <polygon points={MAP.area} />
+            <a href={MAP.kakaoUrl} target="_blank" rel="noreferrer" tabIndex={-1}>
+              <polygon points={MAP.area} />
+            </a>
+            <a href={PARKING_URL} target="_blank" rel="noreferrer" tabIndex={-1}>
+              <polygon className="location__parking" points={MAP.parking.area} />
+            </a>
           </svg>
-          <span className="location__marker" style={{ left: MAP.marker.x, top: MAP.marker.y }}>
+          <a
+            className="location__parking-label"
+            style={{ left: MAP.parking.label.x, top: MAP.parking.label.y }}
+            href={PARKING_URL}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="카카오맵에서 주차장 위치 보기"
+          >
+            <b>P</b>주차장
+          </a>
+          <a
+            className="location__marker"
+            style={{ left: MAP.marker.x, top: MAP.marker.y }}
+            href={MAP.kakaoUrl}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="카카오맵에서 공연 장소 위치 보기"
+          >
             <span className="location__marker-label">공연 장소</span>
             <svg width="28" height="36" viewBox="0 0 28 36" aria-hidden>
               <path d="M14 0C6.27 0 0 6.13 0 13.7 0 24 14 36 14 36s14-12 14-22.3C28 6.13 21.73 0 14 0Z" fill="#2f58c9" />
               <circle cx="14" cy="13.5" r="5" fill="#fff" />
             </svg>
-          </span>
+          </a>
         </div>
-        <span className="location__map-hint">카카오맵에서 보기 ↗</span>
-      </a>
+        <a className="location__map-hint" href={MAP.kakaoUrl} target="_blank" rel="noreferrer">
+          카카오맵에서 보기 ↗
+        </a>
+      </div>
       <div className="location__info">
         <div className="location__heading">
           <p className="section-eyebrow">오시는 길</p>
@@ -336,6 +356,15 @@ function Location() {
         <p className="location__address">
           제주특별자치도 제주시 용담이동 461
         </p>
+        <div className="location__transit">
+          <p className="location__transit-title">주차 안내</p>
+          <ul>
+            <li className="location__parking-item">
+              <strong>{MAP.parking.address}</strong>
+              <span className="location__buses">{MAP.parking.note}</span>
+            </li>
+          </ul>
+        </div>
         <div className="location__transit">
           <p className="location__transit-title">대중교통 이용 안내</p>
           <ul>
@@ -358,7 +387,7 @@ function Location() {
           target="_blank"
           rel="noreferrer"
         >
-          길찾기 (네이버 지도)
+          공연 장소 길찾기 (네이버 지도)
         </a>
       </div>
     </section>
