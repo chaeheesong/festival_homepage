@@ -8,7 +8,6 @@ import './App.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/jeju_neulpureun?stkn=MTQ0d3VoaXV3YjBrdQ%3D%3D'
 const DIRECTIONS_URL = 'https://naver.me/xAfCEpym'
-const PARKING_URL = 'https://map.kakao.com/link/search/' + encodeURIComponent(MAP.parking.address)
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -315,20 +314,7 @@ function Location() {
             <a href={MAP.kakaoUrl} target="_blank" rel="noreferrer" tabIndex={-1}>
               <polygon points={MAP.area} />
             </a>
-            <a href={PARKING_URL} target="_blank" rel="noreferrer" tabIndex={-1}>
-              <polygon className="location__parking" points={MAP.parking.area} />
-            </a>
           </svg>
-          <a
-            className="location__parking-label"
-            style={{ left: MAP.parking.label.x, top: MAP.parking.label.y }}
-            href={PARKING_URL}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="카카오맵에서 주차장 위치 보기"
-          >
-            <b>P</b>주차장
-          </a>
           <a
             className="location__marker"
             style={{ left: MAP.marker.x, top: MAP.marker.y }}
@@ -356,15 +342,6 @@ function Location() {
         <p className="location__address">
           제주특별자치도 제주시 용담이동 461
         </p>
-        <div className="location__transit">
-          <p className="location__transit-title">주차 안내</p>
-          <ul>
-            <li className="location__parking-item">
-              <strong>{MAP.parking.address}</strong>
-              <span className="location__buses">{MAP.parking.note}</span>
-            </li>
-          </ul>
-        </div>
         <div className="location__transit">
           <p className="location__transit-title">대중교통 이용 안내</p>
           <ul>
