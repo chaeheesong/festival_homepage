@@ -487,6 +487,22 @@
         margin: 4px 0 12px;
       }
 
+      /* How to find the spot, above its story */
+      .card__way {
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fbf3e6;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.5;
+        color: var(--rust);
+      }
+
+      .card__way[hidden] {
+        display: none;
+      }
+
       .card__text {
         display: flex;
         flex-direction: column;
@@ -791,6 +807,7 @@
                 <img id="card-photo-img" alt="" />
                 <span class="pin" aria-current="true"><span class="pin__ball" id="card-photo-no"></span><span class="pin__stem"></span></span>
               </figure>
+              <p class="card__way" id="card-way"></p>
               <p class="eyebrow">장소 이야기</p>
               <div class="card__text" id="card-text"></div>
             </div>
@@ -820,16 +837,22 @@
       // [name, dragon, hint, x, y, search?] — x/y: where the pin's tip sits on the PC map;
       // search: what 길찾기 looks up on Kakao Map (default: the name without a trailing " 터")
       const STATIONS = [
-        ['용연구름다리', '용의 시작', '용연의 물결', 659, 434, '제주특별자치도 제주시 용담일동 2581-4'],
+        ['용연구름다리', '용의 시작', '용연의 물결', 659, 434],
         ['서자복', '소원의 용', '마을의 소망', 716, 352],
-        ['갈마수', '생명의 용', '마을의 샘물', 778, 246, '제주특별자치도 제주시 용담일동 2578'],
+        ['갈마수', '생명의 용', '마을의 샘물', 778, 246, '제주특별자치도 제주시 동한두기길 17'],
         ['배고픈다리 터', '추억의 용', '옛 다리의 기억', 929, 483, '제주특별자치도 제주시 탑동로 122'],
         ['비룡못 터', '전설의 용', '비룡의 이야기', 935, 745, '제주특별자치도 제주시 용담일동 97-8'],
         ['제주향교', '지혜의 용', '제주의 역사', 746, 847],
-        ['고시락당', '기원의 용', '마을의 안녕', 684, 481, '제주특별자치도 제주시 용담일동 2579-1'],
+        ['고시락당', '기원의 용', '마을의 안녕', 684, 481, '제주특별자치도 제주시 용담일동 373-5'],
       ]
 
       // Photo shown above a spot's story: [src, x%, y%] — x/y: where the pin's tip sits on the photo (1200 x 675)
+      // How to find a spot, shown above its 장소 이야기
+      const WAYS = {
+        갈마수: '📍 동한두기길 17 맞은편',
+        고시락당: '📍 용연곡 아래 방향',
+      }
+
       const PHOTOS = {
         용연구름다리: ['/asset/image/dragonball-photo-1.jpg', 43.7, 61.6],
         서자복: ['/asset/image/dragonball-photo-2.jpg', 50.6, 48.7],
@@ -837,7 +860,7 @@
         '배고픈다리 터': ['/asset/image/dragonball-photo-4.jpg', 47.3, 57.0],
         '비룡못 터': ['/asset/image/dragonball-photo-5.jpg', 54.8, 50.7],
         제주향교: ['/asset/image/dragonball-photo-6.jpg', 37.2, 58.5],
-        고시락당: ['/asset/image/dragonball-photo-7.jpg', 40.2, 48.4],
+        고시락당: ['/asset/image/dragonball-photo-7.jpg', 37.3, 55.6],
       }
 
       // 장소 이야기 shown when a spot's card is opened, one string per paragraph (a spot without one shows no story)
@@ -952,6 +975,9 @@
           document.getElementById('card-photo-no').textContent = i + 1
           Object.assign(photoEl.querySelector('.pin').style, { left: `${px}%`, top: `${py}%` })
         }
+        const way = document.getElementById('card-way')
+        way.textContent = WAYS[name] ?? ''
+        way.hidden = !WAYS[name]
         document.getElementById('card-story').scrollTop = 0
         document.getElementById('card-link').href =
           'https://map.kakao.com/link/search/' + encodeURIComponent(search ?? name.replace(/ 터$/, ''))
