@@ -1,13 +1,15 @@
 .ended {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
   min-height: 100svh;
   padding: 16px;
+  overflow: hidden;
 }
 
 .ended__text {
+  position: relative;
   font-size: 18px;
   line-height: 1.7;
   text-align: center;
@@ -16,6 +18,13 @@
 }
 
 .ended__clap {
-  flex-shrink: 0;
-  font-size: 32px;
+  position: absolute;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Left-side claps are mirrored so both sides face the message */
+.ended__clap--left {
+  transform: scaleX(-1);
 }
