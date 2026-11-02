@@ -5,6 +5,7 @@ import './EndedPage.css'
 export default function EndedPage() {
   return (
     <main className="ended">
+      <span className="ended__clap" aria-hidden>👏</span>
       <p className="ended__text">
         축제가 성황리에 마무리되었습니다.
         <br />
@@ -12,6 +13,7 @@ export default function EndedPage() {
         <br />
         다음에는 더 발전된 모습으로 찾아뵙겠습니다.
       </p>
+      <span className="ended__clap" aria-hidden>👏</span>
     </main>
   )
 }
