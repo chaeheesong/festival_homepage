@@ -8,28 +8,6 @@ import './App.css'
 
 const INSTAGRAM_URL = 'https://www.instagram.com/jeju_neulpureun?stkn=MTQ0d3VoaXV3YjBrdQ%3D%3D'
 const DIRECTIONS_URL = 'https://naver.me/xAfCEpym'
-// The festival ran on 2026-10-31; from the next day visitors see a thank-you notice first
-const FESTIVAL_END = new Date('2026-11-01T00:00:00+09:00')
-
-function EndedNotice() {
-  const [open, setOpen] = useState(() => Date.now() >= FESTIVAL_END.getTime())
-  if (!open) return null
-
-  return (
-    <div className="ended" role="dialog" aria-modal="true" aria-label="행사 종료 안내" onClick={() => setOpen(false)}>
-      <div className="ended__box" onClick={(e) => e.stopPropagation()}>
-        <p className="ended__text">
-          축제가 성황리에 마무리되었습니다.
-          <br />
-          함께해 주신 모든 분께 감사드리며,
-          <br />
-          다음에는 더 발전된 모습으로 찾아뵙겠습니다.
-        </p>
-        <button type="button" className="ended__close" onClick={() => setOpen(false)}>닫기</button>
-      </div>
-    </div>
-  )
-}
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -453,7 +431,6 @@ export default function App() {
         <Instagram />
       </main>
       <Footer />
-      <EndedNotice />
     </div>
   )
 }

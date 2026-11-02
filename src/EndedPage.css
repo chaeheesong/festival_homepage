@@ -1,0 +1,15 @@
+.ended {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 16px;
+}
+
+.ended__text {
+  font-size: 15px;
+  line-height: 1.7;
+  text-align: center;
+  color: var(--navy-800);
+  word-break: keep-all;
+}
